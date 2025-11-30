@@ -102,6 +102,8 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<any>(null); // stores index for MCQ/TF, string for short
   
+  const isTimeUp = timeLeft === 0;
+
   // Reset local state when question changes
   useEffect(() => {
     setShortAnswer('');
@@ -118,7 +120,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
 
   // Handler for MCQ
   const handleMCQ = (index: number) => {
-    if (isSubmitted) return;
+    if (isSubmitted || isTimeUp) return;
     
     setIsSubmitted(true);
     setSelectedAnswer(index);
@@ -126,13 +128,12 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
     const isCorrect = index === question.correct;
     const earned = isCorrect ? question.points + Math.max(0, timeLeft) : 0;
     
-    // Call parent logic immediately (App handles the delay)
     onAnswer(index, isCorrect, earned);
   };
 
   // Handler for True/False
   const handleTF = (val: boolean) => {
-    if (isSubmitted) return;
+    if (isSubmitted || isTimeUp) return;
 
     setIsSubmitted(true);
     setSelectedAnswer(val);
@@ -146,7 +147,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
   // Handler for Short Answer
   const handleShortSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmitted) return;
+    if (isSubmitted || isTimeUp) return;
     if (!shortAnswer.trim()) return;
 
     setIsSubmitted(true);
@@ -160,13 +161,13 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
 
   // Handler for Matching Logic
   const handleMatchingLeft = (item: string) => {
-    if (isSubmitted) return;
+    if (isSubmitted || isTimeUp) return;
     if (pairs[item]) return; // Already paired
     setSelectedLeft(item);
   };
 
   const handleMatchingRight = (item: string) => {
-    if (isSubmitted) return;
+    if (isSubmitted || isTimeUp) return;
     if (!selectedLeft) return;
     if (Object.values(pairs).includes(item)) return;
 
@@ -196,204 +197,171 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
     }
   };
 
-  // Helper to determine styles based on feedback state
-  const getFeedbackStyles = (optionIndexOrValue: any, correctValue: any) => {
-    if (!isSubmitted) return 'bg-slate-700/50 hover:bg-blue-600 border-white/5';
-    
-    if (optionIndexOrValue === correctValue) {
-      return 'bg-emerald-500/80 border-emerald-500 text-white'; // Correct answer
-    }
-    if (optionIndexOrValue === selectedAnswer) {
-      return 'bg-red-500/80 border-red-500 text-white'; // User's wrong selection
-    }
-    return 'bg-slate-700/50 opacity-40 border-transparent'; // Irrelevant options
-  };
-
   return (
-    <div className="w-full max-w-2xl mx-auto animate-fade-in">
-      {/* Meta Header */}
-      <div className="flex justify-between items-center mb-6 text-sm text-slate-400 font-medium">
-        <div className="bg-slate-800/50 px-3 py-1 rounded-full border border-white/5">
+    <div className="w-full max-w-2xl mx-auto space-y-8 animate-fade-in pb-10">
+      <div className="flex justify-between items-center text-slate-400 font-medium">
+        <span>{qIndex + 1} / {totalQ} Kérdés</span>
+        <div className="px-3 py-1 bg-slate-800 rounded-lg border border-white/5 text-sm">
           {question.category}
         </div>
-        <div>
-          Kérdés <span className="text-white">{qIndex + 1}</span> / {totalQ}
-        </div>
       </div>
 
-      {/* Question Card */}
-      <div className="bg-slate-800/40 backdrop-blur-md border border-white/10 p-6 md:p-8 rounded-2xl shadow-xl">
-        
-        {/* Visual Content for Coordinate System */}
-        {question.gridConfig && (
-          <CoordinateSystem 
-            points={question.gridConfig.points} 
-            highlight={question.gridConfig.highlight}
-          />
+      <div className="space-y-4">
+         <h2 className="text-2xl md:text-3xl font-bold text-white leading-relaxed">
+           {question.question}
+         </h2>
+         {question.gridConfig && (
+           <CoordinateSystem points={question.gridConfig.points} highlight={question.gridConfig.highlight} />
+         )}
+      </div>
+
+      <div className="space-y-4">
+        {question.type === 'mcq' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {question.options?.map((opt, i) => {
+              let cls = "p-4 text-lg font-semibold rounded-xl border-2 text-left transition-all ";
+              if (isSubmitted) {
+                if (i === question.correct) cls += "bg-emerald-500/20 border-emerald-500 text-emerald-400";
+                else if (i === selectedAnswer) cls += "bg-red-500/20 border-red-500 text-red-400";
+                else cls += "bg-slate-800 border-transparent opacity-50";
+              } else {
+                cls += "bg-slate-800 border-white/10 hover:border-blue-500 hover:bg-slate-700/50";
+              }
+              return (
+                <button key={i} onClick={() => handleMCQ(i)} disabled={isSubmitted || isTimeUp} className={cls}>
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
         )}
 
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 leading-tight">
-          {question.question}
-        </h2>
+        {question.type === 'tf' && (
+          <div className="flex gap-4">
+            {[true, false].map(val => {
+               let cls = "flex-1 p-6 text-xl font-bold rounded-xl border-2 transition-all ";
+               if (isSubmitted) {
+                  if (val === question.correct) cls += "bg-emerald-500/20 border-emerald-500 text-emerald-400";
+                  else if (val === selectedAnswer) cls += "bg-red-500/20 border-red-500 text-red-400";
+                  else cls += "bg-slate-800 border-transparent opacity-50";
+               } else {
+                  cls += "bg-slate-800 border-white/10 hover:border-blue-500 hover:bg-slate-700/50";
+               }
+               return (
+                 <button key={String(val)} onClick={() => handleTF(val)} disabled={isSubmitted || isTimeUp} className={cls}>
+                   {val ? "Igaz" : "Hamis"}
+                 </button>
+               );
+            })}
+          </div>
+        )}
 
-        {/* Answer Area */}
-        <div className="space-y-4">
-          
-          {question.type === 'mcq' && question.options && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {question.options.map((opt, i) => {
-                const styles = getFeedbackStyles(i, question.correct);
-                return (
-                  <button
-                    key={i}
-                    disabled={isSubmitted}
-                    onClick={() => handleMCQ(i)}
-                    className={`p-4 text-lg font-semibold rounded-xl border text-left flex items-center gap-3 transition-all duration-200 ${styles} ${!isSubmitted && 'hover:scale-[1.02]'}`}
-                  >
-                    <span className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm ${isSubmitted ? 'bg-black/20' : 'bg-slate-800'}`}>
-                      {String.fromCharCode(65 + i)}
-                    </span>
-                    {opt}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {question.type === 'tf' && (
-            <div className="flex gap-4">
-              {/* True Button */}
-              <button
-                disabled={isSubmitted}
-                onClick={() => handleTF(true)}
-                className={`
-                  flex-1 p-6 text-xl font-bold rounded-xl border transition-all
-                  ${!isSubmitted 
-                    ? 'bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white border-emerald-500/20' 
-                    : question.correct === true 
-                      ? 'bg-emerald-500/80 border-emerald-500 text-white' 
-                      : selectedAnswer === true 
-                        ? 'bg-red-500/80 border-red-500 text-white' 
-                        : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 opacity-40'}
-                `}
+        {(question.type === 'short' || question.type === 'shortnum') && (
+          <form onSubmit={handleShortSubmit} className="space-y-4">
+            <input 
+              type={question.type === 'shortnum' ? "number" : "text"}
+              value={shortAnswer}
+              onChange={e => setShortAnswer(e.target.value)}
+              placeholder="Írd be a választ..."
+              disabled={isSubmitted || isTimeUp}
+              className={`w-full bg-slate-900 border-2 rounded-xl p-4 text-xl outline-none transition-colors ${
+                isSubmitted 
+                  ? (String(shortAnswer).trim() === String(question.correctAnswer).trim() 
+                      ? "border-emerald-500 text-emerald-400" 
+                      : "border-red-500 text-red-400")
+                  : "border-slate-700 focus:border-blue-500"
+              }`}
+            />
+            {!isSubmitted && (
+              <button 
+                type="submit" 
+                disabled={!shortAnswer || isTimeUp}
+                className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-colors"
               >
-                Igaz
+                Beküldés
               </button>
-              {/* False Button */}
-              <button
-                disabled={isSubmitted}
-                onClick={() => handleTF(false)}
-                className={`
-                  flex-1 p-6 text-xl font-bold rounded-xl border transition-all
-                  ${!isSubmitted 
-                    ? 'bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border-red-500/20' 
-                    : question.correct === false
-                      ? 'bg-emerald-500/80 border-emerald-500 text-white' // Note: Correct answer gets green style
-                      : selectedAnswer === false
-                        ? 'bg-red-500/80 border-red-500 text-white' 
-                        : 'bg-red-500/10 border-red-500/20 text-red-400 opacity-40'}
-                `}
-              >
-                Hamis
-              </button>
-            </div>
-          )}
+            )}
+          </form>
+        )}
 
-          {(question.type === 'short' || question.type === 'shortnum') && (
-            <form onSubmit={handleShortSubmit} className="flex flex-col gap-4">
-              <input
-                autoFocus
-                disabled={isSubmitted}
-                type={question.type === 'shortnum' ? "tel" : "text"}
-                value={shortAnswer}
-                onChange={(e) => setShortAnswer(e.target.value)}
-                placeholder="Írd ide a választ..."
-                className={`
-                  w-full bg-slate-900/50 border rounded-xl p-4 text-xl outline-none transition-colors
-                  ${isSubmitted
-                    ? String(selectedAnswer).trim() === String(question.correctAnswer).trim()
-                      ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
-                      : 'border-red-500 text-red-400 bg-red-500/10'
-                    : 'border-slate-600 focus:border-blue-500'}
-                `}
-              />
-              
-              {!isSubmitted && (
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-900/20 transition-transform active:scale-95"
-                >
-                  Beküldés
-                </button>
-              )}
+        {question.type === 'matching' && (
+           <div className="grid grid-cols-2 gap-4 md:gap-8">
+             <div className="space-y-3">
+               {leftItems.map(item => {
+                 const isPaired = !!pairs[item];
+                 const isSelected = selectedLeft === item;
+                 let cls = "w-full p-4 rounded-lg border-2 text-left font-medium transition-all text-sm md:text-base ";
+                 if (isPaired) cls += "bg-blue-900/20 border-blue-500/30 text-blue-300 opacity-50";
+                 else if (isSelected) cls += "bg-blue-600 border-blue-400 text-white shadow-lg scale-105";
+                 else cls += "bg-slate-800 border-white/10 hover:border-blue-500";
+                 return (
+                   <button key={item} onClick={() => handleMatchingLeft(item)} disabled={isSubmitted || isTimeUp || isPaired} className={cls}>
+                     {item}
+                   </button>
+                 );
+               })}
+             </div>
+             <div className="space-y-3">
+               {rightItems.map(item => {
+                 const pairKey = Object.keys(pairs).find(k => pairs[k] === item);
+                 const isPaired = !!pairKey;
+                 let cls = "w-full p-4 rounded-lg border-2 text-right font-medium transition-all text-sm md:text-base ";
+                 
+                 if (isPaired) {
+                    if (isSubmitted) {
+                       const correct = question.pairs && question.pairs[pairKey!] === item;
+                       cls += correct ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" : "bg-red-500/20 border-red-500 text-red-400";
+                    } else {
+                       cls += "bg-blue-900/20 border-blue-500/30 text-blue-300";
+                    }
+                 } else if (selectedLeft) {
+                    cls += "bg-slate-800 border-white/10 hover:border-blue-500 cursor-pointer animate-pulse";
+                 } else {
+                    cls += "bg-slate-800 border-transparent opacity-50";
+                 }
 
-              {isSubmitted && String(selectedAnswer).trim() !== String(question.correctAnswer).trim() && (
-                 <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl flex items-center gap-3 animate-fade-in">
-                    <div className="bg-emerald-500 text-black rounded-full w-6 h-6 flex items-center justify-center font-bold">✓</div>
-                    <div>
-                      <span className="text-slate-400 text-sm block">Helyes válasz:</span>
-                      <span className="text-emerald-400 font-bold text-lg">{question.correctAnswer}</span>
-                    </div>
-                 </div>
-              )}
-            </form>
-          )}
-
-          {question.type === 'matching' && (
-            <div className="grid grid-cols-2 gap-4 md:gap-8">
-              {/* Left Column */}
-              <div className="flex flex-col gap-3">
-                {leftItems.map((item) => {
-                  const isPaired = !!pairs[item];
-                  const isSelected = selectedLeft === item;
-                  return (
-                    <button
-                      key={item}
-                      onClick={() => handleMatchingLeft(item)}
-                      disabled={isPaired || isSubmitted}
-                      className={`
-                        p-3 md:p-4 rounded-xl text-sm md:text-base font-medium text-left transition-all border
-                        ${isPaired 
-                          ? 'opacity-40 bg-slate-800 border-transparent cursor-not-allowed' 
-                          : isSelected 
-                            ? 'bg-blue-600 border-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.5)] scale-105' 
-                            : 'bg-slate-700/50 border-white/5 hover:bg-slate-700'}
-                      `}
-                    >
-                      {item}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Right Column */}
-              <div className="flex flex-col gap-3">
-                {rightItems.map((item) => {
-                  const isUsed = Object.values(pairs).includes(item);
-                  return (
-                    <button
-                      key={item}
-                      onClick={() => handleMatchingRight(item)}
-                      disabled={(!selectedLeft || isUsed) || isSubmitted}
-                      className={`
-                        p-3 md:p-4 rounded-xl text-sm md:text-base font-medium text-right transition-all border
-                        ${isUsed 
-                          ? 'opacity-0 pointer-events-none' 
-                          : selectedLeft 
-                            ? 'bg-slate-700/50 border-blue-500/30 hover:bg-blue-500/20 cursor-pointer animate-pulse' 
-                            : 'bg-slate-800/30 border-transparent opacity-50 cursor-default'}
-                      `}
-                    >
-                      {item}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-        </div>
+                 return (
+                   <button key={item} onClick={() => handleMatchingRight(item)} disabled={isSubmitted || isTimeUp || (isPaired && !isSubmitted)} className={cls}>
+                     {item}
+                   </button>
+                 );
+               })}
+             </div>
+           </div>
+        )}
       </div>
+
+      {isSubmitted && (
+        <div className={`p-6 rounded-2xl border ${
+           // Calculate generic correctness for feedback box style
+           (question.type === 'matching' ? false : (
+             question.type === 'short' || question.type === 'shortnum' 
+             ? String(shortAnswer).trim() === String(question.correctAnswer).trim()
+             : selectedAnswer === question.correct
+           ))
+           ? "bg-emerald-500/10 border-emerald-500/20"
+           : "bg-red-500/10 border-red-500/20"
+        } animate-fade-in`}>
+          <div className="flex items-center gap-3 mb-2">
+             <div className={`text-lg font-bold ${
+                (question.type === 'matching' ? false : (
+                 question.type === 'short' || question.type === 'shortnum' 
+                 ? String(shortAnswer).trim() === String(question.correctAnswer).trim()
+                 : selectedAnswer === question.correct
+               )) ? "text-emerald-400" : "text-red-400"
+             }`}>
+               {(question.type === 'matching' ? "Eredmény:" : (
+                 (question.type === 'short' || question.type === 'shortnum' 
+                 ? String(shortAnswer).trim() === String(question.correctAnswer).trim()
+                 : selectedAnswer === question.correct) ? "Helyes Válasz!" : "Helytelen Válasz!"
+               ))}
+             </div>
+          </div>
+          <div className="text-slate-300 leading-relaxed">
+            {question.explanation}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

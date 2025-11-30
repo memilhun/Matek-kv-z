@@ -16,6 +16,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isAnswerProcessedRef = useRef(false);
 
   // Extract unique categories
   const categories = useMemo(() => {
@@ -36,23 +37,38 @@ export default function App() {
   const startQuestionTimer = (seconds: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
     setTimeLeft(seconds);
+    
+    // Reset processed flag for the new question
+    isAnswerProcessedRef.current = false;
+
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) {
-          handleTimeOut();
+        const newValue = prev - 1;
+        if (newValue <= 0) {
+          if (timerRef.current) clearInterval(timerRef.current);
           return 0;
         }
-        return prev - 1;
+        return newValue;
       });
     }, 1000);
   };
 
+  // Monitor timer for timeout
+  useEffect(() => {
+    if (timeLeft === 0 && gameState === 'PLAYING' && !isAnswerProcessedRef.current) {
+      handleTimeOut();
+    }
+  }, [timeLeft, gameState]);
+
   const handleTimeOut = () => {
-    // Automatically submit a wrong answer/no answer
+    // Automatically submit a wrong answer/no answer with 0 points
     handleAnswer(null, false, 0);
   };
 
   const handleAnswer = (given: any, correct: boolean, points: number) => {
+    if (isAnswerProcessedRef.current) return;
+    isAnswerProcessedRef.current = true;
+
     if (timerRef.current) clearInterval(timerRef.current);
     
     const currentQ = questions[currentIndex];
@@ -66,7 +82,7 @@ export default function App() {
       type: currentQ.type,
       explanation: currentQ.explanation,
       pairs: currentQ.pairs, // for matching type review
-      given,
+      given: given === null ? "Idő lejárt" : given,
       correct,
       earned: points
     }]);
@@ -77,7 +93,7 @@ export default function App() {
         const nextIndex = currentIndex + 1;
         setCurrentIndex(nextIndex);
         startQuestionTimer(questions[nextIndex].time);
-      }, 1000); // 1s delay to see feedback if we added visual feedback in QuizScreen
+      }, 1000); // 1s delay to see feedback
     } else {
       setTimeout(() => {
         setGameState('FINISHED');
