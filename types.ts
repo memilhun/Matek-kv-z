@@ -1,5 +1,11 @@
 export type QuestionType = 'mcq' | 'tf' | 'short' | 'shortnum' | 'matching';
 
+export interface GridPoint {
+  label: string;
+  x: number;
+  y: number;
+}
+
 export interface Question {
   id: string;
   category: string;
@@ -14,6 +20,11 @@ export interface Question {
   correct?: number | boolean; // For MCQ (index) or TF (boolean)
   correctAnswer?: string; // For Short/Shortnum
   pairs?: Record<string, string>; // For Matching
+  // For Coordinate System questions
+  gridConfig?: {
+    points: GridPoint[];
+    highlight?: string; // Optional: label of point to highlight
+  };
 }
 
 export interface AnswerRecord {
