@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Question, GridPoint } from '../types';
+import { Question, GridPoint, AnswerValue } from '../types';
 
 interface QuizScreenProps {
   question: Question;
   qIndex: number;
   totalQ: number;
   timeLeft: number;
-  onAnswer: (given: any, correct: boolean, points: number) => void;
+  onAnswer: (given: AnswerValue, correct: boolean) => void;
+  onNext: () => void;
+  isLastQuestion: boolean;
 }
 
 // Helper Component: Coordinate Grid SVG
@@ -21,10 +23,21 @@ const CoordinateSystem: React.FC<{ points: GridPoint[], highlight?: string }> = 
     cy: center - y * scale // SVG y is inverted
   });
 
+  const a11yLabel = highlight 
+    ? `Koordináta rendszer. A kijelölt pont: ${highlight}.` 
+    : "Koordináta rendszer pontokkal.";
+
   return (
     <div className="flex justify-center mb-6">
       <div className="bg-slate-900 rounded-xl border border-slate-700 p-2 shadow-inner overflow-hidden">
-        <svg width="320" height="320" viewBox="0 0 320 320" className="select-none">
+        <svg 
+          width="320" 
+          height="320" 
+          viewBox="0 0 320 320" 
+          className="select-none" 
+          role="img" 
+          aria-label={a11yLabel}
+        >
           {/* Grid Lines */}
           {Array.from({ length: 21 }).map((_, i) => {
             const pos = i - 10;
@@ -89,7 +102,7 @@ const CoordinateSystem: React.FC<{ points: GridPoint[], highlight?: string }> = 
   );
 };
 
-export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ, timeLeft, onAnswer }) => {
+export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ, timeLeft, onAnswer, onNext, isLastQuestion }) => {
   const [shortAnswer, setShortAnswer] = useState('');
   
   // Matching state
@@ -100,9 +113,10 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
 
   // Feedback state
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [selectedAnswer, setSelectedAnswer] = useState<any>(null); // stores index for MCQ/TF, string for short
+  const [selectedAnswer, setSelectedAnswer] = useState<AnswerValue | null>(null); 
   
   const isTimeUp = timeLeft === 0;
+  const showResult = isSubmitted || isTimeUp;
 
   // Reset local state when question changes
   useEffect(() => {
@@ -126,9 +140,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
     setSelectedAnswer(index);
 
     const isCorrect = index === question.correct;
-    const earned = isCorrect ? question.points + Math.max(0, timeLeft) : 0;
-    
-    onAnswer(index, isCorrect, earned);
+    onAnswer(index, isCorrect);
   };
 
   // Handler for True/False
@@ -139,9 +151,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
     setSelectedAnswer(val);
 
     const isCorrect = val === question.correct;
-    const earned = isCorrect ? question.points + Math.max(0, timeLeft) : 0;
-    
-    onAnswer(val, isCorrect, earned);
+    onAnswer(val, isCorrect);
   };
 
   // Handler for Short Answer
@@ -154,9 +164,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
     setSelectedAnswer(shortAnswer);
 
     const isCorrect = shortAnswer.trim() === String(question.correctAnswer).trim();
-    const earned = isCorrect ? question.points + Math.max(0, timeLeft) : 0;
-    
-    onAnswer(shortAnswer, isCorrect, earned);
+    onAnswer(shortAnswer, isCorrect);
   };
 
   // Handler for Matching Logic
@@ -187,15 +195,23 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
       });
       
       const ratio = correctCount / leftItems.length;
-      const base = Math.round(question.points * ratio);
       const isPerfect = ratio === 1;
-      const earned = base + Math.max(0, timeLeft);
       
+      // Delay slightly so the user sees the last match connecting
       setTimeout(() => {
-        onAnswer(Object.entries(newPairs).map(([k,v]) => ({k, actual:v})), isPerfect, earned);
-      }, 500);
+        onAnswer(Object.entries(newPairs).map(([k,v]) => ({k, actual:v})), isPerfect);
+      }, 300);
     }
   };
+
+  // Determine if the answer is correct for feedback display
+  const isCorrect = isSubmitted && (
+    question.type === 'matching' 
+      ? Object.entries(pairs).every(([k, v]) => question.pairs && question.pairs[k] === v) && Object.keys(pairs).length === Object.keys(question.pairs || {}).length
+      : (question.type === 'short' || question.type === 'shortnum' 
+          ? String(shortAnswer).trim() === String(question.correctAnswer).trim()
+          : selectedAnswer === question.correct)
+  );
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-8 animate-fade-in pb-10">
@@ -220,15 +236,15 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {question.options?.map((opt, i) => {
               let cls = "p-4 text-lg font-semibold rounded-xl border-2 text-left transition-all ";
-              if (isSubmitted) {
+              if (showResult) {
                 if (i === question.correct) cls += "bg-emerald-500/20 border-emerald-500 text-emerald-400";
-                else if (i === selectedAnswer) cls += "bg-red-500/20 border-red-500 text-red-400";
+                else if (isSubmitted && i === selectedAnswer) cls += "bg-red-500/20 border-red-500 text-red-400";
                 else cls += "bg-slate-800 border-transparent opacity-50";
               } else {
                 cls += "bg-slate-800 border-white/10 hover:border-blue-500 hover:bg-slate-700/50";
               }
               return (
-                <button key={i} onClick={() => handleMCQ(i)} disabled={isSubmitted || isTimeUp} className={cls}>
+                <button key={i} onClick={() => handleMCQ(i)} disabled={showResult} className={cls}>
                   {opt}
                 </button>
               );
@@ -240,15 +256,15 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
           <div className="flex gap-4">
             {[true, false].map(val => {
                let cls = "flex-1 p-6 text-xl font-bold rounded-xl border-2 transition-all ";
-               if (isSubmitted) {
+               if (showResult) {
                   if (val === question.correct) cls += "bg-emerald-500/20 border-emerald-500 text-emerald-400";
-                  else if (val === selectedAnswer) cls += "bg-red-500/20 border-red-500 text-red-400";
+                  else if (isSubmitted && val === selectedAnswer) cls += "bg-red-500/20 border-red-500 text-red-400";
                   else cls += "bg-slate-800 border-transparent opacity-50";
                } else {
                   cls += "bg-slate-800 border-white/10 hover:border-blue-500 hover:bg-slate-700/50";
                }
                return (
-                 <button key={String(val)} onClick={() => handleTF(val)} disabled={isSubmitted || isTimeUp} className={cls}>
+                 <button key={String(val)} onClick={() => handleTF(val)} disabled={showResult} className={cls}>
                    {val ? "Igaz" : "Hamis"}
                  </button>
                );
@@ -263,16 +279,16 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
               value={shortAnswer}
               onChange={e => setShortAnswer(e.target.value)}
               placeholder="Írd be a választ..."
-              disabled={isSubmitted || isTimeUp}
+              disabled={showResult}
               className={`w-full bg-slate-900 border-2 rounded-xl p-4 text-xl outline-none transition-colors ${
-                isSubmitted 
-                  ? (String(shortAnswer).trim() === String(question.correctAnswer).trim() 
+                showResult 
+                  ? (isCorrect 
                       ? "border-emerald-500 text-emerald-400" 
                       : "border-red-500 text-red-400")
                   : "border-slate-700 focus:border-blue-500"
               }`}
             />
-            {!isSubmitted && (
+            {!showResult && (
               <button 
                 type="submit" 
                 disabled={!shortAnswer || isTimeUp}
@@ -295,7 +311,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
                  else if (isSelected) cls += "bg-blue-600 border-blue-400 text-white shadow-lg scale-105";
                  else cls += "bg-slate-800 border-white/10 hover:border-blue-500";
                  return (
-                   <button key={item} onClick={() => handleMatchingLeft(item)} disabled={isSubmitted || isTimeUp || isPaired} className={cls}>
+                   <button key={item} onClick={() => handleMatchingLeft(item)} disabled={showResult || isPaired} className={cls}>
                      {item}
                    </button>
                  );
@@ -308,7 +324,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
                  let cls = "w-full p-4 rounded-lg border-2 text-right font-medium transition-all text-sm md:text-base ";
                  
                  if (isPaired) {
-                    if (isSubmitted) {
+                    if (showResult) {
                        const correct = question.pairs && question.pairs[pairKey!] === item;
                        cls += correct ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" : "bg-red-500/20 border-red-500 text-red-400";
                     } else {
@@ -321,7 +337,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
                  }
 
                  return (
-                   <button key={item} onClick={() => handleMatchingRight(item)} disabled={isSubmitted || isTimeUp || (isPaired && !isSubmitted)} className={cls}>
+                   <button key={item} onClick={() => handleMatchingRight(item)} disabled={showResult || (isPaired && !showResult)} className={cls}>
                      {item}
                    </button>
                  );
@@ -331,35 +347,35 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
         )}
       </div>
 
-      {isSubmitted && (
+      {showResult && (
         <div className={`p-6 rounded-2xl border ${
-           // Calculate generic correctness for feedback box style
-           (question.type === 'matching' ? false : (
-             question.type === 'short' || question.type === 'shortnum' 
-             ? String(shortAnswer).trim() === String(question.correctAnswer).trim()
-             : selectedAnswer === question.correct
-           ))
+           isCorrect
            ? "bg-emerald-500/10 border-emerald-500/20"
            : "bg-red-500/10 border-red-500/20"
         } animate-fade-in`}>
           <div className="flex items-center gap-3 mb-2">
              <div className={`text-lg font-bold ${
-                (question.type === 'matching' ? false : (
-                 question.type === 'short' || question.type === 'shortnum' 
-                 ? String(shortAnswer).trim() === String(question.correctAnswer).trim()
-                 : selectedAnswer === question.correct
-               )) ? "text-emerald-400" : "text-red-400"
+                isCorrect ? "text-emerald-400" : "text-red-400"
              }`}>
-               {(question.type === 'matching' ? "Eredmény:" : (
-                 (question.type === 'short' || question.type === 'shortnum' 
-                 ? String(shortAnswer).trim() === String(question.correctAnswer).trim()
-                 : selectedAnswer === question.correct) ? "Helyes Válasz!" : "Helytelen Válasz!"
-               ))}
+               {isTimeUp && !isSubmitted 
+                  ? "Idő lejárt!" 
+                  : (question.type === 'matching' ? "Eredmény:" : (isCorrect ? "Helyes Válasz!" : "Helytelen Válasz!"))}
              </div>
           </div>
-          <div className="text-slate-300 leading-relaxed">
+          <div className="text-slate-300 leading-relaxed mb-6">
             {question.explanation}
           </div>
+
+          <button 
+            onClick={onNext}
+            className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98] ${
+              isLastQuestion 
+                ? "bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 shadow-emerald-900/20" 
+                : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-900/20"
+            }`}
+          >
+            {isLastQuestion ? "Eredmények Megtekintése" : "Következő feladat →"}
+          </button>
         </div>
       )}
     </div>

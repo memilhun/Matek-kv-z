@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { GameState, Question, AnswerRecord } from './types';
+import { GameState, Question, AnswerRecord, LeaderboardEntry, AnswerValue } from './types';
 import { questionBank, getShuffledQuestions } from './data';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultScreen } from './components/ResultScreen';
+import { Leaderboard } from './components/Leaderboard';
 
 const APP_VERSION = '1.0.0';
 
@@ -14,6 +15,7 @@ export default function App() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [answerHistory, setAnswerHistory] = useState<AnswerRecord[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isAnswerProcessedRef = useRef(false);
@@ -23,9 +25,30 @@ export default function App() {
     return Array.from(new Set(questionBank.map(q => q.category)));
   }, []);
 
+  // Load leaderboard data
+  useEffect(() => {
+    if (gameState === 'MENU') {
+      try {
+        const lb = JSON.parse(localStorage.getItem('mv_lb') || '[]');
+        if (Array.isArray(lb)) {
+          setLeaderboardData(lb);
+        } else {
+          setLeaderboardData([]);
+        }
+      } catch (e) {
+        console.error("Hiba a ranglista betöltésekor:", e);
+        setLeaderboardData([]);
+      }
+    }
+  }, [gameState]);
+
   // Start Game Logic
   const startGame = () => {
     const qSet = getShuffledQuestions(10, selectedCategory);
+    if (qSet.length === 0) {
+      alert("Ebben a kategóriában sajnos nincsenek kérdések.");
+      return;
+    }
     setQuestions(qSet);
     setScore(0);
     setCurrentIndex(0);
@@ -43,29 +66,29 @@ export default function App() {
 
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
-        const newValue = prev - 1;
-        if (newValue <= 0) {
+        // If time is about to hit 0 (or is 1 going to 0)
+        if (prev <= 1) {
           if (timerRef.current) clearInterval(timerRef.current);
+          
+          // Use setTimeout to break out of the state update cycle 
+          // and trigger handleTimeOut safely
+          setTimeout(() => {
+            handleTimeOut();
+          }, 0);
+          
           return 0;
         }
-        return newValue;
+        return prev - 1;
       });
     }, 1000);
   };
 
-  // Monitor timer for timeout
-  useEffect(() => {
-    if (timeLeft === 0 && gameState === 'PLAYING' && !isAnswerProcessedRef.current) {
-      handleTimeOut();
-    }
-  }, [timeLeft, gameState]);
-
   const handleTimeOut = () => {
     // Automatically submit a wrong answer/no answer with 0 points
-    handleAnswer(null, false, 0);
+    handleAnswer(null, false);
   };
 
-  const handleAnswer = (given: any, correct: boolean, points: number) => {
+  const handleAnswer = (given: AnswerValue | null, correct: boolean) => {
     if (isAnswerProcessedRef.current) return;
     isAnswerProcessedRef.current = true;
 
@@ -73,6 +96,41 @@ export default function App() {
     
     const currentQ = questions[currentIndex];
     
+    // Calculate points centrally in App
+    let points = 0;
+    if (correct) {
+      // Matching questions handled slightly differently in terms of 'correct' bool,
+      // but if the QuizScreen says it's correct (or perfect), we give full points + time bonus.
+      // If matching was partial, QuizScreen might need more complex logic, 
+      // but for now we assume 'correct' means full success or calculated partial success logic needs to be here.
+      // Since QuizScreen handles the partial matching logic internally before calling this, 
+      // we'll stick to the base formula:
+      
+      // Note: For matching, if we want partial points, the 'correct' flag is insufficient. 
+      // Ideally QuizScreen calculates 'base points' and we add time bonus.
+      // But per instruction to move logic:
+      // If it is matching type, we might want to check the 'given' array.
+      // For simplicity and fixing the bug, we assume 'correct' means the user got points.
+      // To strictly follow the fix:
+      
+      points = currentQ.points + Math.max(0, timeLeft);
+      
+      // Adjustment for matching if it wasn't a perfect match? 
+      // The original code calculated points inside QuizScreen based on ratio.
+      // To replicate that strictly here would require calculating ratio from `given` if type is matching.
+      if (currentQ.type === 'matching' && Array.isArray(given) && currentQ.pairs) {
+        let correctCount = 0;
+        const givenPairs = given as {k:string, actual:string}[];
+        givenPairs.forEach(p => {
+           if (currentQ.pairs && currentQ.pairs[p.k] === p.actual) correctCount++;
+        });
+        const total = Object.keys(currentQ.pairs).length;
+        const ratio = total > 0 ? correctCount / total : 0;
+        const base = Math.round(currentQ.points * ratio);
+        points = base + Math.max(0, timeLeft);
+      }
+    }
+
     setScore(prev => prev + points);
     
     // Record history
@@ -87,17 +145,16 @@ export default function App() {
       earned: points
     }]);
 
-    // Move to next
+    // No automatic transition. User must click "Next" in QuizScreen.
+  };
+
+  const handleNext = () => {
     if (currentIndex < questions.length - 1) {
-      setTimeout(() => {
-        const nextIndex = currentIndex + 1;
-        setCurrentIndex(nextIndex);
-        startQuestionTimer(questions[nextIndex].time);
-      }, 1000); // 1s delay to see feedback
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
+      startQuestionTimer(questions[nextIndex].time);
     } else {
-      setTimeout(() => {
-        setGameState('FINISHED');
-      }, 1000);
+      setGameState('FINISHED');
     }
   };
 
@@ -125,7 +182,7 @@ export default function App() {
               <span className="text-xs uppercase text-slate-400 font-bold">Pont</span>
               <span className="font-mono text-blue-400 font-bold">{score}</span>
             </div>
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 font-bold transition-colors ${timeLeft < 5 ? 'border-red-500 text-red-500 animate-pulse' : 'border-blue-500/30 text-slate-300'}`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 font-bold transition-colors ${timeLeft < 5 && timeLeft > 0 ? 'border-red-500 text-red-500 animate-pulse' : 'border-blue-500/30 text-slate-300'}`}>
               {timeLeft}
             </div>
           </div>
@@ -179,6 +236,11 @@ export default function App() {
             >
               Kvíz Indítása
             </button>
+
+            {/* Toplist Display on Start Screen */}
+            <div className="pt-4 border-t border-white/10">
+              <Leaderboard entries={leaderboardData} />
+            </div>
             
             <div className="text-xs text-slate-500 mt-8 font-mono">
               v{APP_VERSION}
@@ -193,6 +255,8 @@ export default function App() {
             totalQ={questions.length}
             timeLeft={timeLeft}
             onAnswer={handleAnswer}
+            onNext={handleNext}
+            isLastQuestion={currentIndex === questions.length - 1}
           />
         )}
 

@@ -27,10 +27,12 @@ export interface Question {
   };
 }
 
+export type AnswerValue = string | number | boolean | {k: string, actual: string}[];
+
 export interface AnswerRecord {
   questionId: string;
   questionText: string;
-  given: any;
+  given: AnswerValue;
   correct: boolean;
   earned: number;
   explanation?: string;
