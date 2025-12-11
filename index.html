@@ -2,7 +2,7 @@
 <html lang="hu">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Matematika 5. Osztály</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -23,9 +23,14 @@
       }
     </script>
     <style>
+      html {
+        touch-action: manipulation; /* Prevents double-tap zoom */
+        -webkit-text-size-adjust: 100%; /* Prevents font scaling */
+      }
       body {
         background: radial-gradient(circle at top center, #1e293b 0%, #020617 100%);
         color: #e2e8f0;
+        overscroll-behavior-y: none; /* Prevents bounce effects */
       }
       /* Custom scrollbar for leaderboards */
       ::-webkit-scrollbar {
