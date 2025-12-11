@@ -914,12 +914,21 @@ export const questionBank: Question[] = [
 
 ];
 
-// Helper to shuffle questions
+// Helper to shuffle questions using Fisher-Yates algorithm
 export function getShuffledQuestions(count: number = 10, category: string = 'all'): Question[] {
   let pool = questionBank;
   if (category && category !== 'all') {
     pool = questionBank.filter(q => q.category === category);
   }
-  const shuffled = [...pool].sort(() => 0.5 - Math.random());
+  
+  // Create a copy to shuffle
+  const shuffled = [...pool];
+  
+  // Fisher-Yates shuffle
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
   return shuffled.slice(0, count);
 }

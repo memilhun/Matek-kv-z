@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Question, GridPoint, AnswerValue } from '../types';
 
@@ -118,14 +119,9 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
   const isTimeUp = timeLeft === 0;
   const showResult = isSubmitted || isTimeUp;
 
-  // Reset local state when question changes
+  // Initialize matching items when question changes
+  // Note: Standard state reset is handled by the parent component using a unique 'key' prop
   useEffect(() => {
-    setShortAnswer('');
-    setSelectedLeft(null);
-    setPairs({});
-    setIsSubmitted(false);
-    setSelectedAnswer(null);
-
     if (question.type === 'matching' && question.pairs) {
       setLeftItems(Object.keys(question.pairs));
       setRightItems([...Object.values(question.pairs)].sort(() => Math.random() - 0.5));
@@ -224,6 +220,19 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
           : selectedAnswer === question.correct)
   );
 
+  // Helper for button classes
+  const getButtonClass = (valueOrIndex: number | boolean) => {
+    let cls = "p-4 text-lg font-semibold rounded-xl border-2 text-left transition-all ";
+    if (showResult) {
+      if (valueOrIndex === question.correct) cls += "bg-emerald-500/20 border-emerald-500 text-emerald-400";
+      else if (isSubmitted && valueOrIndex === selectedAnswer) cls += "bg-red-500/20 border-red-500 text-red-400";
+      else cls += "bg-slate-800 border-transparent opacity-50";
+    } else {
+      cls += "bg-slate-800 border-white/10 hover:border-blue-500 hover:bg-slate-700/50";
+    }
+    return cls;
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto space-y-8 animate-fade-in pb-10">
       <div className="flex justify-between items-center text-slate-400 font-medium">
@@ -245,41 +254,21 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
       <div className="space-y-4">
         {question.type === 'mcq' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {question.options?.map((opt, i) => {
-              let cls = "p-4 text-lg font-semibold rounded-xl border-2 text-left transition-all ";
-              if (showResult) {
-                if (i === question.correct) cls += "bg-emerald-500/20 border-emerald-500 text-emerald-400";
-                else if (isSubmitted && i === selectedAnswer) cls += "bg-red-500/20 border-red-500 text-red-400";
-                else cls += "bg-slate-800 border-transparent opacity-50";
-              } else {
-                cls += "bg-slate-800 border-white/10 hover:border-blue-500 hover:bg-slate-700/50";
-              }
-              return (
-                <button key={i} onClick={() => handleMCQ(i)} disabled={showResult} className={cls}>
-                  {opt}
-                </button>
-              );
-            })}
+            {question.options?.map((opt, i) => (
+              <button key={i} onClick={() => handleMCQ(i)} disabled={showResult} className={getButtonClass(i)}>
+                {opt}
+              </button>
+            ))}
           </div>
         )}
 
         {question.type === 'tf' && (
           <div className="flex gap-4">
-            {[true, false].map(val => {
-               let cls = "flex-1 p-6 text-xl font-bold rounded-xl border-2 transition-all ";
-               if (showResult) {
-                  if (val === question.correct) cls += "bg-emerald-500/20 border-emerald-500 text-emerald-400";
-                  else if (isSubmitted && val === selectedAnswer) cls += "bg-red-500/20 border-red-500 text-red-400";
-                  else cls += "bg-slate-800 border-transparent opacity-50";
-               } else {
-                  cls += "bg-slate-800 border-white/10 hover:border-blue-500 hover:bg-slate-700/50";
-               }
-               return (
-                 <button key={String(val)} onClick={() => handleTF(val)} disabled={showResult} className={cls}>
-                   {val ? "Igaz" : "Hamis"}
-                 </button>
-               );
-            })}
+            {[true, false].map(val => (
+               <button key={String(val)} onClick={() => handleTF(val)} disabled={showResult} className={getButtonClass(val) + " flex-1 text-xl font-bold"}>
+                 {val ? "Igaz" : "Hamis"}
+               </button>
+            ))}
           </div>
         )}
 

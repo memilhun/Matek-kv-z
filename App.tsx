@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { GameState, Question, AnswerRecord, LeaderboardEntry, AnswerValue } from './types';
+import { GameState, Question, AnswerRecord, LeaderboardEntry, AnswerValue, STORAGE_KEY_LEADERBOARD } from './types';
 import { questionBank, getShuffledQuestions } from './data';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultScreen } from './components/ResultScreen';
@@ -30,7 +31,7 @@ export default function App() {
   useEffect(() => {
     if (gameState === 'MENU') {
       try {
-        const lb = JSON.parse(localStorage.getItem('mv_lb') || '[]');
+        const lb = JSON.parse(localStorage.getItem(STORAGE_KEY_LEADERBOARD) || '[]');
         if (Array.isArray(lb)) {
           setLeaderboardData(lb);
         } else {
@@ -60,28 +61,29 @@ export default function App() {
 
   const startQuestionTimer = (seconds: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
-    setTimeLeft(seconds);
     
-    // Reset processed flag for the new question
+    setTimeLeft(seconds);
     isAnswerProcessedRef.current = false;
 
+    // Use Date.now() for accurate timing to prevent drift
+    const endTime = Date.now() + seconds * 1000;
+
     timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        // If time is about to hit 0 (or is 1 going to 0)
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          
-          // Use setTimeout to break out of the state update cycle 
-          // and trigger handleTimeOut safely
-          setTimeout(() => {
-            handleTimeOut();
-          }, 0);
-          
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+      const now = Date.now();
+      const diff = Math.ceil((endTime - now) / 1000);
+
+      if (diff <= 0) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        setTimeLeft(0);
+        
+        // Use setTimeout to break out of the state update cycle 
+        setTimeout(() => {
+          handleTimeOut();
+        }, 0);
+      } else {
+        setTimeLeft(diff);
+      }
+    }, 250); // Check more frequently than 1s to ensure visual responsiveness
   };
 
   const handleTimeOut = () => {
@@ -152,7 +154,7 @@ export default function App() {
   return (
     <div className="min-h-screen font-sans text-slate-100 flex flex-col">
       {/* Header */}
-      <header className="p-4 md:p-6 flex items-center justify-between max-w-5xl mx-auto w-full">
+      <header className="p-4 md:p-6 flex items-center justify-between max-w-6xl mx-auto w-full">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setGameState('MENU')}>
           <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center font-bold text-lg md:text-xl shadow-lg shadow-blue-500/20">
             M5
@@ -174,66 +176,84 @@ export default function App() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-6 w-full max-w-5xl mx-auto flex flex-col justify-center">
+      <main className="flex-1 p-4 md:p-6 w-full max-w-6xl mx-auto flex flex-col justify-center">
         
         {gameState === 'MENU' && (
-          <div className="text-center space-y-8 animate-fade-in max-w-lg mx-auto w-full">
-            <div className="space-y-4">
-              <h2 className="text-4xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 pb-2">
-                Matek Kvíz
-              </h2>
-              <p className="text-slate-400 text-lg">
-                Gyakorold a negatív számokat és az alapműveleteket egy interaktív kihívásban!
-              </p>
-            </div>
-
-            <div className="bg-slate-800/40 p-6 rounded-2xl border border-white/5 backdrop-blur-sm space-y-4">
-              <div className="flex justify-between text-sm text-slate-400 border-b border-white/5 pb-2">
-                <span>Kérdések</span>
-                <span className="text-white font-semibold">10 db (Random)</span>
-              </div>
-              
-              <div className="pt-2">
-                <label className="block text-sm text-left text-slate-400 mb-2 font-medium">Kategória választása</label>
-                <select 
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500 transition-colors"
-                >
-                  <option value="all">Minden kategória</option>
-                  {categories.map(cat => (
-                    <option key={cat} value={cat}>
-                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              <button
-                onClick={startGame}
-                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xl font-bold py-5 rounded-2xl shadow-xl shadow-blue-900/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Kvíz Indítása
-              </button>
-
-              <button
-                onClick={() => setGameState('STATS')}
-                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl border border-white/10 transition-colors flex items-center justify-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                Statisztikák és Feladatbank
-              </button>
-            </div>
-
-            {/* Toplist Display on Start Screen */}
-            <div className="pt-4 border-t border-white/10">
-              <Leaderboard entries={leaderboardData} />
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in w-full">
             
-            <div className="text-xs text-slate-500 mt-8 font-mono">
-              v{APP_VERSION}
+            {/* Left Column: Actions */}
+            <div className="lg:col-span-2 space-y-6 flex flex-col">
+              
+              {/* Game Config Card */}
+              <div className="bg-slate-800 p-6 md:p-8 rounded-2xl border border-blue-500/20 shadow-xl flex-1 flex flex-col justify-center">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-blue-500/20 rounded-lg text-blue-400">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Új Játék Indítása</h2>
+                    <p className="text-slate-400 text-sm">Válassz témakört és kezdődjön a kihívás!</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs uppercase text-slate-500 font-bold mb-2 ml-1">Témakör</label>
+                    <select 
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-4 text-white outline-none focus:border-blue-500 transition-all cursor-pointer hover:bg-slate-900/80"
+                    >
+                      <option value="all">🎲 Minden kategória (Vegyes)</option>
+                      {categories.map(cat => (
+                        <option key={cat} value={cat}>
+                          Topic: {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={startGame}
+                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xl font-bold py-5 rounded-xl shadow-lg shadow-blue-900/30 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
+                  >
+                    Indítás
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                  </button>
+                  
+                  <div className="text-center text-xs text-slate-500 mt-2">
+                    A játék 10 véletlenszerű kérdést tartalmaz.
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Card (as Button) */}
+              <button 
+                onClick={() => setGameState('STATS')}
+                className="bg-slate-800/50 hover:bg-slate-800 p-6 rounded-2xl border border-white/5 hover:border-white/10 transition-all text-left group flex items-center justify-between"
+              >
+                <div className="flex items-center gap-4">
+                   <div className="p-3 bg-purple-500/20 rounded-lg text-purple-400 group-hover:scale-110 transition-transform">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                   </div>
+                   <div>
+                     <h3 className="text-lg font-bold text-white group-hover:text-blue-300 transition-colors">Adatbázis és Statisztika</h3>
+                     <p className="text-slate-400 text-sm">Böngészd a feladatokat és nézd meg az eloszlást.</p>
+                   </div>
+                </div>
+                <div className="text-right hidden sm:block">
+                  <div className="text-2xl font-black text-slate-200">{questionBank.length}</div>
+                  <div className="text-xs text-slate-500 uppercase font-bold">Feladat</div>
+                </div>
+              </button>
+
+            </div>
+
+            {/* Right Column: Leaderboard */}
+            <div className="lg:col-span-1 h-full">
+              <div className="bg-slate-800/50 p-6 rounded-2xl border border-white/5 h-full">
+                <Leaderboard entries={leaderboardData} />
+              </div>
             </div>
           </div>
         )}
@@ -247,6 +267,7 @@ export default function App() {
 
         {gameState === 'PLAYING' && questions.length > 0 && (
           <QuizScreen 
+            key={questions[currentIndex].id}
             question={questions[currentIndex]}
             qIndex={currentIndex}
             totalQ={questions.length}
@@ -267,6 +288,13 @@ export default function App() {
         )}
         
       </main>
+      
+      {/* Footer */}
+      {gameState === 'MENU' && (
+        <footer className="text-center p-4 text-xs text-slate-600">
+           v{APP_VERSION} &bull; Matematika gyakorló 5. osztályosoknak
+        </footer>
+      )}
     </div>
   );
 }

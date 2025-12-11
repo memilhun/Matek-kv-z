@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { AnswerRecord, LeaderboardEntry } from '../types';
+import { AnswerRecord, LeaderboardEntry, STORAGE_KEY_LEADERBOARD } from '../types';
 import { Leaderboard } from './Leaderboard';
 
 interface ResultScreenProps {
@@ -16,7 +17,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
 
   useEffect(() => {
     try {
-      const lb = JSON.parse(localStorage.getItem('mv_lb') || '[]');
+      const lb = JSON.parse(localStorage.getItem(STORAGE_KEY_LEADERBOARD) || '[]');
       if (Array.isArray(lb)) {
         setLeaderboard(lb);
       } else {
@@ -36,7 +37,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
       date: new Date().toISOString()
     };
     const newLb = [...leaderboard, newEntry].sort((a, b) => b.score - a.score).slice(0, 50); // keep top 50
-    localStorage.setItem('mv_lb', JSON.stringify(newLb));
+    localStorage.setItem(STORAGE_KEY_LEADERBOARD, JSON.stringify(newLb));
     setLeaderboard(newLb);
     setSaved(true);
   };

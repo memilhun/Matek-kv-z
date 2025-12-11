@@ -1,3 +1,4 @@
+
 export type QuestionType = 'mcq' | 'tf' | 'short' | 'shortnum' | 'matching';
 
 export interface GridPoint {
@@ -47,3 +48,6 @@ export interface LeaderboardEntry {
 }
 
 export type GameState = 'MENU' | 'PLAYING' | 'FINISHED' | 'STATS';
+
+// Constants
+export const STORAGE_KEY_LEADERBOARD = 'mv_lb';
