@@ -90,10 +90,10 @@ export default function App() {
 
   const handleTimeOut = () => {
     // Automatically submit a wrong answer/no answer with 0 points
-    handleAnswer(null, false);
+    handleAnswer(null, false, false);
   };
 
-  const handleAnswer = (given: AnswerValue | null, correct: boolean) => {
+  const handleAnswer = (given: AnswerValue | null, correct: boolean, hintUsed: boolean) => {
     if (isAnswerProcessedRef.current) return;
     isAnswerProcessedRef.current = true;
 
@@ -152,6 +152,11 @@ export default function App() {
       }
 
       earnedPoints = Math.round(basePoints * multiplier) + timeBonus;
+
+      // HINT PENALTY: Reduce points by 50% if hint was used
+      if (hintUsed) {
+        earnedPoints = Math.round(earnedPoints / 2);
+      }
     }
 
     setScore(prev => prev + earnedPoints);
@@ -165,7 +170,8 @@ export default function App() {
       pairs: currentQ.pairs, // for matching type review
       given: given === null ? "Idő lejárt" : given,
       correct,
-      earned: earnedPoints
+      earned: earnedPoints,
+      hintUsed
     }]);
 
     // No automatic transition. User must click "Next" in QuizScreen.

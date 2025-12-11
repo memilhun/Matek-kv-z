@@ -39,6 +39,7 @@ export interface AnswerRecord {
   explanation?: string;
   type: QuestionType;
   pairs?: Record<string, string>; // To show expected pairs in review
+  hintUsed?: boolean; // New field to track if hint was used
 }
 
 export interface LeaderboardEntry {
