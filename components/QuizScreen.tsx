@@ -277,7 +277,8 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
             <input 
               /* Changed type="number" to "text" to allow characters like '/' for fractions and to control decimal separators manually */
               type="text"
-              inputMode={question.type === 'shortnum' ? 'decimal' : 'text'}
+              /* Use text input mode to ensure availability of minus sign, comma, and slash on iOS/Android keyboards */
+              inputMode="text"
               value={shortAnswer}
               onChange={e => setShortAnswer(e.target.value)}
               placeholder={question.type === 'shortnum' ? "Pl. 3,5 vagy 1/2" : "Írd be a választ..."}
