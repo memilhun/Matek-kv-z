@@ -15,6 +15,7 @@ export default function App() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [streak, setStreak] = useState(0); // Track consecutive correct answers
   const [answerHistory, setAnswerHistory] = useState<AnswerRecord[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
@@ -53,6 +54,7 @@ export default function App() {
     }
     setQuestions(qSet);
     setScore(0);
+    setStreak(0);
     setCurrentIndex(0);
     setAnswerHistory([]);
     setGameState('PLAYING');
@@ -99,10 +101,29 @@ export default function App() {
     
     const currentQ = questions[currentIndex];
     
-    // Calculate points centrally in App
-    let points = 0;
+    // --- SCORING LOGIC UPDATE ---
+    
+    // 1. Calculate Time Spent
+    const timeSpent = currentQ.time - timeLeft;
+    
+    // 2. Anti-Guessing Rule: If difficulty is Medium/Hard and answered in < 2 seconds -> No time bonus
+    const isSpeeding = (currentQ.difficulty === 'medium' || currentQ.difficulty === 'hard') && timeSpent < 2;
+
+    // 3. Streak Management
+    let currentStreak = streak;
     if (correct) {
-      points = currentQ.points + Math.max(0, timeLeft);
+      currentStreak += 1;
+    } else {
+      currentStreak = 0;
+    }
+    setStreak(currentStreak);
+
+    // 4. Point Calculation
+    let earnedPoints = 0;
+    
+    if (correct) {
+      // Base points calculation (handling partials for matching if needed)
+      let basePoints = currentQ.points;
       
       if (currentQ.type === 'matching' && Array.isArray(given) && currentQ.pairs) {
         let correctCount = 0;
@@ -112,12 +133,28 @@ export default function App() {
         });
         const total = Object.keys(currentQ.pairs).length;
         const ratio = total > 0 ? correctCount / total : 0;
-        const base = Math.round(currentQ.points * ratio);
-        points = base + Math.max(0, timeLeft);
+        basePoints = Math.round(currentQ.points * ratio);
       }
+
+      // Streak Multiplier
+      let multiplier = 1;
+      if (currentStreak >= 3) {
+        multiplier = 1.5;
+      } else if (currentStreak === 2) {
+        multiplier = 1.2;
+      }
+
+      // Time Bonus (Halved weight)
+      let timeBonus = Math.round(Math.max(0, timeLeft) * 0.5);
+      
+      if (isSpeeding) {
+        timeBonus = 0; // Penalty for guessing too fast on hard questions
+      }
+
+      earnedPoints = Math.round(basePoints * multiplier) + timeBonus;
     }
 
-    setScore(prev => prev + points);
+    setScore(prev => prev + earnedPoints);
     
     // Record history
     setAnswerHistory(prev => [...prev, {
@@ -128,7 +165,7 @@ export default function App() {
       pairs: currentQ.pairs, // for matching type review
       given: given === null ? "Idő lejárt" : given,
       correct,
-      earned: points
+      earned: earnedPoints
     }]);
 
     // No automatic transition. User must click "Next" in QuizScreen.
@@ -164,6 +201,14 @@ export default function App() {
         
         {gameState === 'PLAYING' && (
           <div className="flex items-center gap-4">
+             {/* Streak Indicator */}
+             {streak > 1 && (
+              <div className="hidden sm:flex items-center gap-1 bg-orange-500/20 px-3 py-2 rounded-lg border border-orange-500/50 text-orange-400 animate-pulse">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" /></svg>
+                <span className="font-bold text-xs uppercase">{streak}x Sorozat</span>
+              </div>
+            )}
+
             <div className="bg-slate-800/80 px-4 py-2 rounded-lg border border-white/5 flex items-center gap-2">
               <span className="text-xs uppercase text-slate-400 font-bold">Pont</span>
               <span className="font-mono text-blue-400 font-bold">{score}</span>
