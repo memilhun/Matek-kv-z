@@ -154,6 +154,12 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
     onAnswer(val, isCorrect);
   };
 
+  // Helper to normalize strings for comparison (handles 3.5 vs 3,5 and spaces)
+  const normalizeAnswer = (str: string) => {
+    if (!str) return '';
+    return str.toString().trim().replace(/\s/g, '').replace(/\./g, ',').toLowerCase();
+  };
+
   // Handler for Short Answer
   const handleShortSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,7 +169,12 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
     setIsSubmitted(true);
     setSelectedAnswer(shortAnswer);
 
-    const isCorrect = shortAnswer.trim() === String(question.correctAnswer).trim();
+    // Normalize both user answer and correct answer
+    // This allows accepting "3.5" when correct is "3,5" and ignores extra spaces
+    const userNorm = normalizeAnswer(shortAnswer);
+    const correctNorm = normalizeAnswer(String(question.correctAnswer));
+
+    const isCorrect = userNorm === correctNorm;
     onAnswer(shortAnswer, isCorrect);
   };
 
@@ -209,7 +220,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
     question.type === 'matching' 
       ? Object.entries(pairs).every(([k, v]) => question.pairs && question.pairs[k] === v) && Object.keys(pairs).length === Object.keys(question.pairs || {}).length
       : (question.type === 'short' || question.type === 'shortnum' 
-          ? String(shortAnswer).trim() === String(question.correctAnswer).trim()
+          ? normalizeAnswer(String(shortAnswer)) === normalizeAnswer(String(question.correctAnswer))
           : selectedAnswer === question.correct)
   );
 
@@ -275,11 +286,14 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({ question, qIndex, totalQ
         {(question.type === 'short' || question.type === 'shortnum') && (
           <form onSubmit={handleShortSubmit} className="space-y-4">
             <input 
-              type={question.type === 'shortnum' ? "number" : "text"}
+              /* Changed type="number" to "text" to allow characters like '/' for fractions and to control decimal separators manually */
+              type="text"
+              inputMode={question.type === 'shortnum' ? 'decimal' : 'text'}
               value={shortAnswer}
               onChange={e => setShortAnswer(e.target.value)}
-              placeholder="Írd be a választ..."
+              placeholder={question.type === 'shortnum' ? "Pl. 3,5 vagy 1/2" : "Írd be a választ..."}
               disabled={showResult}
+              autoComplete="off"
               className={`w-full bg-slate-900 border-2 rounded-xl p-4 text-xl outline-none transition-colors ${
                 showResult 
                   ? (isCorrect 

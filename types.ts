@@ -46,4 +46,4 @@ export interface LeaderboardEntry {
   date: string;
 }
 
-export type GameState = 'MENU' | 'PLAYING' | 'FINISHED';
+export type GameState = 'MENU' | 'PLAYING' | 'FINISHED' | 'STATS';

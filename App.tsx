@@ -4,6 +4,7 @@ import { questionBank, getShuffledQuestions } from './data';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultScreen } from './components/ResultScreen';
 import { Leaderboard } from './components/Leaderboard';
+import { StatisticsScreen } from './components/StatisticsScreen';
 
 const APP_VERSION = '1.0.0';
 
@@ -99,25 +100,8 @@ export default function App() {
     // Calculate points centrally in App
     let points = 0;
     if (correct) {
-      // Matching questions handled slightly differently in terms of 'correct' bool,
-      // but if the QuizScreen says it's correct (or perfect), we give full points + time bonus.
-      // If matching was partial, QuizScreen might need more complex logic, 
-      // but for now we assume 'correct' means full success or calculated partial success logic needs to be here.
-      // Since QuizScreen handles the partial matching logic internally before calling this, 
-      // we'll stick to the base formula:
-      
-      // Note: For matching, if we want partial points, the 'correct' flag is insufficient. 
-      // Ideally QuizScreen calculates 'base points' and we add time bonus.
-      // But per instruction to move logic:
-      // If it is matching type, we might want to check the 'given' array.
-      // For simplicity and fixing the bug, we assume 'correct' means the user got points.
-      // To strictly follow the fix:
-      
       points = currentQ.points + Math.max(0, timeLeft);
       
-      // Adjustment for matching if it wasn't a perfect match? 
-      // The original code calculated points inside QuizScreen based on ratio.
-      // To replicate that strictly here would require calculating ratio from `given` if type is matching.
       if (currentQ.type === 'matching' && Array.isArray(given) && currentQ.pairs) {
         let correctCount = 0;
         const givenPairs = given as {k:string, actual:string}[];
@@ -169,7 +153,7 @@ export default function App() {
     <div className="min-h-screen font-sans text-slate-100 flex flex-col">
       {/* Header */}
       <header className="p-4 md:p-6 flex items-center justify-between max-w-5xl mx-auto w-full">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setGameState('MENU')}>
           <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center font-bold text-lg md:text-xl shadow-lg shadow-blue-500/20">
             M5
           </div>
@@ -193,7 +177,7 @@ export default function App() {
       <main className="flex-1 p-4 md:p-6 w-full max-w-5xl mx-auto flex flex-col justify-center">
         
         {gameState === 'MENU' && (
-          <div className="text-center space-y-8 animate-fade-in max-w-lg mx-auto">
+          <div className="text-center space-y-8 animate-fade-in max-w-lg mx-auto w-full">
             <div className="space-y-4">
               <h2 className="text-4xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 pb-2">
                 Matek Kvíz
@@ -206,11 +190,7 @@ export default function App() {
             <div className="bg-slate-800/40 p-6 rounded-2xl border border-white/5 backdrop-blur-sm space-y-4">
               <div className="flex justify-between text-sm text-slate-400 border-b border-white/5 pb-2">
                 <span>Kérdések</span>
-                <span className="text-white font-semibold">10 db</span>
-              </div>
-              <div className="flex justify-between text-sm text-slate-400 border-b border-white/5 pb-2">
-                <span>Időkeret</span>
-                <span className="text-white font-semibold">Változó</span>
+                <span className="text-white font-semibold">10 db (Random)</span>
               </div>
               
               <div className="pt-2">
@@ -230,12 +210,22 @@ export default function App() {
               </div>
             </div>
 
-            <button
-              onClick={startGame}
-              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xl font-bold py-5 rounded-2xl shadow-xl shadow-blue-900/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Kvíz Indítása
-            </button>
+            <div className="grid grid-cols-1 gap-4">
+              <button
+                onClick={startGame}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xl font-bold py-5 rounded-2xl shadow-xl shadow-blue-900/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Kvíz Indítása
+              </button>
+
+              <button
+                onClick={() => setGameState('STATS')}
+                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl border border-white/10 transition-colors flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                Statisztikák és Feladatbank
+              </button>
+            </div>
 
             {/* Toplist Display on Start Screen */}
             <div className="pt-4 border-t border-white/10">
@@ -246,6 +236,13 @@ export default function App() {
               v{APP_VERSION}
             </div>
           </div>
+        )}
+
+        {gameState === 'STATS' && (
+          <StatisticsScreen 
+            questions={questionBank}
+            onBack={() => setGameState('MENU')}
+          />
         )}
 
         {gameState === 'PLAYING' && questions.length > 0 && (
