@@ -534,7 +534,7 @@ export const questionBank: Question[] = [
     explanation: '1 óra = 60 perc. 1/4 óra = 15 perc (60:4). 3/4 óra = 3 · 15 = 45 perc.'
   },
   {
-    id: 'frac_part_4', category: 'Törtszámok', difficulty: 'medium', type: 'mcq', time: 30, points: 100,
+    id: 'frac_part_4', category: 'Törtszámok', difficulty: 'medium', type: 'shortnum', time: 30, points: 100,
     question: 'Mennyi 24-nek a 2/3 része?',
     options: ['12', '16', '18', '8'],
     correct: 1,
@@ -679,7 +679,7 @@ export const questionBank: Question[] = [
   {id:'geo_rel_5',category:'Geometriai alapismeretek',difficulty:'easy',type:'mcq',time:20,points:50,question:'Mi a jele a merőlegességnek?',options:['⊥','||','/','-'],correct:0,explanation:'A fordított T betű (⊥) jelöli a merőlegességet.'},
 
   // A kör (5 db)
-  {id:'geo_circ_1',category:'Geometriai alapismeretek',difficulty:'medium',type:'mcq',time:25,points:100,question:'Mi a kapcsolat a kör sugara (r) és átmérője (d) között?',options:['d = 2 * r','r = 2 * d','d = r + 2','d = r * r'],correct:0,explanation:'Az átmérő a kör egyik felétől a másikig ér a középponton át. Ez pontosan két sugárnyi hossz. d = 2 · r.'},
+  {id:'geo_circ_1',category:'Geometriai alapismeretek',difficulty:'medium',type:'mcq',time:25,points:100,question:'Mi a kapcsolat a kör sugara (r) and átmérője (d) között?',options:['d = 2 * r','r = 2 * d','d = r + 2','d = r * r'],correct:0,explanation:'Az átmérő a kör egyik felétől a másikig ér a középponton át. Ez pontosan két sugárnyi hossz. d = 2 · r.'},
   {id:'geo_circ_2',category:'Geometriai alapismeretek',difficulty:'easy',type:'tf',time:20,points:50,question:'Igaz vagy hamis: A kör középpontja egyenlő távolságra van a körvonal minden pontjától.',correct:true,explanation:'Igaz, ez a távolság a sugár.'},
   {id:'geo_circ_3',category:'Geometriai alapismeretek',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Ha a sugár 5 cm, hány cm az átmérő?',correctAnswer:'10',explanation:'Az átmérő a sugár kétszerese: 5 · 2 = 10 cm.'},
   {id:'geo_circ_4',category:'Geometriai alapismeretek',difficulty:'hard',type:'matching',time:30,points:200,question:'Párosítsd a fogalmakat:',pairs:{'Sugár':'Középpont és körvonal távolsága','Átmérő':'Középponton átmenő húr','Körvonal':'A kör határvonala'},explanation:'A sugár félig ér át, az átmérő teljesen.'},
@@ -769,7 +769,7 @@ export const questionBank: Question[] = [
   },
   {
     id: 'ang_concept_2', category: 'Szögek', difficulty: 'medium', type: 'tf', time: 20, points: 100,
-    question: 'Igaz vagy hamis: Egy háromszögben lehet 3 hegyesszög.',
+    question: 'Igaz vagy hamis: Egy háromszög में lehet 3 hegyesszög.',
     correct: true,
     explanation: 'Igaz, például a szabályos háromszögben mindhárom szög 60 fokos (hegyes).'
   },
@@ -833,7 +833,7 @@ export const questionBank: Question[] = [
   
   // -- Tizedes törtek (Elmélet) --
   {id:'dec_theory_1',category:'Tizedes törtek',difficulty:'easy',type:'tf',time:20,points:50,question:'Igaz vagy hamis: A 2,5 és a 2,500 értéke ugyanaz.',correct:true,explanation:'A tizedesvessző utáni számjegyek végére írt nullák nem változtatják meg a szám értékét.'},
-  {id:'dec_theory_2',category:'Tizedes törtek',difficulty:'medium',type:'mcq',time:20,points:100,question:'Melyik irányba mozdul a tizedesvessző, ha 10-zel osztunk?',options:['Jobbra','Balra','Nem mozdul','Eltűnik'],correct:1,explanation:'Ha osztunk, a szám kisebb lesz, ezért a tizedesvesszőt balra toljuk.'},
+  {id:'dec_theory_2',category:'Tizedes törtek',difficulty:'medium',type:'mcq',time:20,points:100,question:'Melyik irányba mozdul a tizedesvessző, if 10-zel osztunk?',options:['Jobbra','Balra','Nem mozdul','Eltűnik'],correct:1,explanation:'Ha osztunk, a szám kisebb lesz, ezért a tizedesvesszőt balra toljuk.'},
 
 
   // --- ÚJ KATEGÓRIA 6: Mértékegységek ---
@@ -911,7 +911,38 @@ export const questionBank: Question[] = [
     question: 'Párosítsd a mennyiségeket:',
     pairs: {'Tömeg': 'kilogramm', 'Hosszúság': 'méter', 'Űrtartalom': 'liter'},
     explanation: 'Alapvető fizikai mennyiségek és mértékegységeik.'
-  }
+  },
+
+  // --- ÚJ FELADATOK HOZZÁADÁSA (A listából ami még nem volt meg) ---
+  {id:'unit_len_h1',category:'Mértékegységek',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Hány dm 2 kilométer?',correctAnswer:'20000',explanation:'Lépcsők: km --(1000)--> m --(10)--> dm. Tehát 2 · 1000 · 10 = 20 000 dm.'},
+  {id:'unit_len_h2',category:'Mértékegységek',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Hány cm 0,5 kilométer?',correctAnswer:'50000',explanation:'km --(1000)--> m --(100)--> cm. 500 m = 50 000 cm.'},
+  {id:'unit_mass_m1',category:'Mértékegységek',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Hány kg negyed tonna (1/4 t)?',correctAnswer:'250',explanation:'1 t = 1000 kg. 1000 : 4 = 250 kg.'},
+  {id:'unit_mass_h1',category:'Mértékegységek',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Hány gramm 3 kg és 20 dkg együtt?',correctAnswer:'3200',explanation:'3 kg = 3000 g, 20 dkg = 200 g. Összesen: 3200 g.'},
+  {id:'unit_mass_h2',category:'Mértékegységek',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Hány dkg 2,5 tonna?',correctAnswer:'250000',explanation:'t --(1000)--> kg --(100)--> dkg. 2500 kg = 250 000 dkg.'},
+  {id:'unit_cap_h1',category:'Mértékegységek',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Hány cl 2 hektoliter (hl)?',correctAnswer:'20000',explanation:'hl --(100)--> l --(10)--> dl --(10)--> cl. 200 l = 2000 dl = 20 000 cl.'},
+  {id:'unit_cap_h2',category:'Mértékegységek',difficulty:'hard',type:'mcq',time:30,points:200,question:'Melyik a több: 1 liter vagy 12 dl?',options:['12 dl','1 liter','Egyenlőek','Nem dönthető el'],correct:0,explanation:'1 liter = 10 dl. Mivel 12 > 10, a 12 dl a több.'},
+  {id:'unit_time_3',category:'Mértékegységek',difficulty:'hard',type:'shortnum',time:40,points:200,question:'Hány óra 3 nap és 4 óra összesen?',correctAnswer:'76',explanation:'1 nap = 24 óra. 3 nap = 3 · 24 = 72 óra. 72 + 4 = 76 óra.'},
+  {id:'unit_time_4',category:'Mértékegységek',difficulty:'easy',type:'shortnum',time:20,points:50,question:'Hány másodperc fél perc?',correctAnswer:'30',explanation:'1 perc = 60 mp. Ennek fele 30 mp.'},
+  {id:'unit_time_5',category:'Mértékegységek',difficulty:'medium',type:'shortnum',time:30,points:100,question:'Hány óra egy negyed nap?',correctAnswer:'6',explanation:'24 óra : 4 = 6 óra.'},
+  {id:'unit_time_6',category:'Mértékegységek',difficulty:'medium',type:'matching',time:35,points:100,question:'Párosítsd az időtartamokat:',pairs:{'negyed óra':'15 perc','fél óra':'30 perc','háromnegyed óra':'45 perc'},explanation:'Az óra törtrészei 60-as váltószámmal.'},
+  {id:'unit_time_7',category:'Mértékegységek',difficulty:'easy',type:'tf',time:20,points:50,question:'Igaz vagy hamis: Egy évben 12 hónap van.',correct:true,explanation:'Januártól decemberig pontosan 12 hónapot számolunk.'},
+  {id:'unit_time_8',category:'Mértékegységek',difficulty:'hard',type:'shortnum',time:40,points:200,question:'Hány másodperc 10 perc?',correctAnswer:'600',explanation:'10 · 60 = 600 másodperc.'},
+  {id:'unit_est_1',category:'Mértékegységek',difficulty:'medium',type:'mcq',time:25,points:100,question:'Milyen egységben mérjük legcélszerűbben egy radír tömegét?',options:['gramm (g)','kilogramm (kg)','tonna (t)','dekagramm (dkg)'],correct:0,explanation:'Egy radír könnyű, grammban a legpraktikusabb mérni.'},
+  {id:'unit_est_2',category:'Mértékegységek',difficulty:'medium',type:'mcq',time:25,points:100,question:'Milyen hosszú egy átlagos új ceruza?',options:['18 cm','18 mm','18 dm','1,8 m'],correct:0,explanation:'Egy ceruza kb. arasznyi, tehát 18 cm.'},
+  {id:'unit_est_3',category:'Mértékegységek',difficulty:'medium',type:'tf',time:20,points:100,question:'Igaz vagy hamis: Egy felnőtt elefánt tömege kb. 5 tonna.',correct:true,explanation:'Igen, az elefántok tömegét tonnában mérjük, az 5t reális becslés.'},
+  {id:'unit_est_4',category:'Mértékegységek',difficulty:'medium',type:'mcq',time:25,points:100,question:'Mennyi folyadék fér egy átlagos vizespohárba?',options:['2 dl','2 l','2 cl','2 ml'],correct:0,explanation:'A poharak űrtartalma általában 2-3 dl.'},
+  {id:'unit_est_5',category:'Mértékegységek',difficulty:'medium',type:'mcq',time:25,points:100,question:'Milyen magas egy átlagos tanterem?',options:['3 m','30 cm','30 m','3 km'],correct:0,explanation:'Egy szoba magassága kb. 3 méter.'},
+  {id:'unit_est_6',category:'Mértékegységek',difficulty:'medium',type:'mcq',time:25,points:100,question:'Mennyi egy kg kenyér tömege dkg-ban?',options:['100 dkg','10 dkg','1000 dkg','50 dkg'],correct:0,explanation:'1 kg = 100 dkg.'},
+  {id:'unit_temp_2',category:'Mértékegységek',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Hány fok a különbség a -5 °C és a 15 °C között?',correctAnswer:'20',explanation:'A -5-től a 0-ig 5 fok, onnan a 15-ig még 15. Összesen 20 fok különbség.'},
+  {id:'unit_comp_1',category:'Mértékegységek',difficulty:'hard',type:'shortnum',time:40,points:200,question:'Mennyi 2 m és 45 cm milliméterben?',correctAnswer:'2450',explanation:'2 m = 2000 mm, 45 cm = 450 mm. Összesen 2450 mm.'},
+  {id:'unit_theory_pref',category:'Mértékegységek',difficulty:'medium',type:'matching',time:35,points:100,question:'Párosítsd a prefixumokat a jelentésükkel:',pairs:{'kilo-':'ezerszeres','milli-':'ezredrész','centi-':'századrész'},explanation:'Ezek a görög/latin előtagok segítenek az átváltásban.'},
+  {id:'unit_theory_area',category:'Mértékegységek',difficulty:'hard',type:'tf',time:25,points:200,question:'Igaz vagy hamis: A terület váltószámai (m², dm², cm²) 100-asával ugranak.',correct:true,explanation:'Igaz. Mivel 1 dm = 10 cm, ezért 1 dm² = 10 · 10 = 100 cm².'},
+  {id:'unit_area_h1',category:'Mértékegységek',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Hány cm² egy 2 dm²-es terület?',correctAnswer:'200',explanation:'dm² --(100)--> cm². 2 · 100 = 200 cm².'},
+  {id:'unit_area_h2',category:'Mértékegységek',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Hány m² 500 dm²?',correctAnswer:'5',explanation:'dm² --(:100)--> m². 500 : 100 = 5 m².'},
+  {id:'unit_mix_3',category:'Mértékegységek',difficulty:'medium',type:'mcq',time:30,points:100,question:'Melyik a rövidebb?',options:['150 mm','2 dm','Egyenlőek','Nem dönthető el'],correct:0,explanation:'150 mm = 1,5 dm. Mivel 1,5 < 2, a 150 mm a rövidebb.'},
+  {id:'unit_mix_4',category:'Mértékegységek',difficulty:'easy',type:'tf',time:20,points:50,question:'Igaz vagy hamis: 1 liter víz tömege kb. 1 kg.',correct:true,explanation:'Igen, a víz sűrűsége miatt 1 liter tiszta víz kb. 1 kg-ot nyom.'},
+  {id:'unit_match_2',category:'Mértékegységek',difficulty:'medium',type:'matching',time:35,points:100,question:'Párosítsd a mértékegységeket:',pairs:{'1000 g':'1 kg','1000 kg':'1 t','100 dkg':'1 kg'},explanation:'Tömegegységek összefüggései.'},
+  {id:'unit_match_3',category:'Mértékegységek',difficulty:'medium',type:'matching',time:35,points:100,question:'Hosszúság váltások:',pairs:{'100 cm':'1 m','1000 m':'1 km','10 mm':'1 cm'},explanation:'Hosszúságok összefüggései.'}
 
 ];
 

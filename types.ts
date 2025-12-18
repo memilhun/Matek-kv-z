@@ -16,15 +16,13 @@ export interface Question {
   points: number;
   question: string;
   explanation?: string;
-  // Specific properties based on type
-  options?: string[]; // For MCQ
-  correct?: number | boolean; // For MCQ (index) or TF (boolean)
-  correctAnswer?: string; // For Short/Shortnum
-  pairs?: Record<string, string>; // For Matching
-  // For Coordinate System questions
+  options?: string[];
+  correct?: number | boolean;
+  correctAnswer?: string;
+  pairs?: Record<string, string>;
   gridConfig?: {
     points: GridPoint[];
-    highlight?: string; // Optional: label of point to highlight
+    highlight?: string;
   };
 }
 
@@ -38,17 +36,28 @@ export interface AnswerRecord {
   earned: number;
   explanation?: string;
   type: QuestionType;
-  pairs?: Record<string, string>; // To show expected pairs in review
-  hintUsed?: boolean; // New field to track if hint was used
+  category?: string; // Bővítve a statisztikához
+  timeSpent?: number; // Bővítve a statisztikához
+  hintUsed?: boolean;
 }
 
 export interface LeaderboardEntry {
   name: string;
   score: number;
   date: string;
+  isGlobal?: boolean;
+}
+
+export interface GlobalStats {
+  totalCompletions: number;
+  avgScore: number;
+  categorySuccess: Record<string, number>; // Category -> Success %
+  typeSuccess: Record<string, number>;     // Type -> Success %
+  difficultQuestions: {id: string, text: string, failRate: number}[];
 }
 
 export type GameState = 'MENU' | 'PLAYING' | 'FINISHED' | 'STATS';
 
-// Constants
 export const STORAGE_KEY_LEADERBOARD = 'mv_lb';
+// Ez a helyőrző a Google Apps Script URL-jéhez
+export const GAS_URL = 'https://script.google.com/macros/s/AKfycbyWtF9JUQBcSGYVQ9e809e8dORXg8u0t64JnMlsj2rknZ1AhnES5W72tGjv98m2-YmpIA/exec'; 
