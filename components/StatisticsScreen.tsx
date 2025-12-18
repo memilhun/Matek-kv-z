@@ -64,7 +64,8 @@ export const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ questions, o
           <div className="bg-slate-800/50 p-6 rounded-2xl border border-white/5 space-y-4">
             <h3 className="text-lg font-bold text-white flex items-center gap-2"><svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg> Kategóriák ({Object.keys(bankStats.categories).length})</h3>
             <div className="space-y-2">
-              {Object.entries(bankStats.categories).sort((a,b) => b[1]-a[1]).map(([cat, count]) => (
+              {/* Fix: Explicitly cast count to number to resolve arithmetic operation type error */}
+              {Object.entries(bankStats.categories).sort((a,b) => (b[1] as number) - (a[1] as number)).map(([cat, count]) => (
                 <div key={cat} className="flex justify-between items-center p-3 bg-slate-900 rounded-lg border border-white/5">
                   <span className="text-sm text-slate-300">{cat}</span>
                   <span className="text-xs font-bold bg-slate-800 px-2 py-1 rounded text-blue-400">{count} db</span>
@@ -109,13 +110,15 @@ export const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ questions, o
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 text-center">
                   <div className="text-xs text-slate-500 font-bold uppercase mb-1">Legjobb kategória</div>
                   <div className="text-sm font-bold text-emerald-400 truncate mt-2">
-                    {Object.entries(globalData.categorySuccess).sort((a,b) => b[1]-a[1])[0]?.[0] || '-'}
+                    {/* Fix: Explicitly cast category success value to number to resolve arithmetic operation type error */}
+                    {Object.entries(globalData.categorySuccess).sort((a,b) => (b[1] as number) - (a[1] as number))[0]?.[0] || '-'}
                   </div>
                 </div>
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 text-center">
                   <div className="text-xs text-slate-500 font-bold uppercase mb-1">Leggyengébb típus</div>
                   <div className="text-sm font-bold text-red-400 truncate mt-2">
-                    {Object.entries(globalData.typeSuccess).sort((a,b) => a[1]-b[1])[0]?.[0] || '-'}
+                    {/* Fix: Explicitly cast type success value to number to resolve arithmetic operation type error */}
+                    {Object.entries(globalData.typeSuccess).sort((a,b) => (a[1] as number) - (b[1] as number))[0]?.[0] || '-'}
                   </div>
                 </div>
               </div>
