@@ -116,12 +116,14 @@ export const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ questions, i
                   <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 text-center">
                     <div className="text-xs text-slate-500 font-bold uppercase mb-1">Legjobb témakör</div>
                     <div className="text-sm font-bold text-emerald-400 truncate mt-2">
+                      {/* Explicitly cast entry values to number to fix arithmetic type errors */}
                       {Object.entries(globalData.categorySuccess).sort((a,b) => (b[1] as number) - (a[1] as number))[0]?.[0] || '-'}
                     </div>
                   </div>
                   <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 text-center">
                     <div className="text-xs text-slate-500 font-bold uppercase mb-1">Leggyengébb típus</div>
                     <div className="text-sm font-bold text-red-400 truncate mt-2">
+                      {/* Explicitly cast entry values to number to fix arithmetic type errors */}
                       {Object.entries(globalData.typeSuccess).sort((a,b) => (b[1] as number) - (a[1] as number))[0]?.[0] || '-'}
                     </div>
                   </div>
@@ -131,6 +133,7 @@ export const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ questions, i
                   <h3 className="text-lg font-bold text-white mb-4">Sikerességi ráta témakörönként</h3>
                   <div className="space-y-4">
                     {Object.entries(globalData.categorySuccess)
+                      /* Explicitly cast entry values to number for sorting */
                       .sort((a, b) => (b[1] as number) - (a[1] as number))
                       .map(([cat, rate]) => (
                       <div key={cat}>

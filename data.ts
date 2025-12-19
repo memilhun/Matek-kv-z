@@ -69,10 +69,19 @@ export function getShuffledQuestions(count: number = 10, category: string = 'all
   
   let selected = shuffle(pool).slice(0, count);
 
-  // Ha a 'Vegyes' kategóriát választják, dobjunk be 2 véletlenszerűen generált feladatot is
-  if (category === 'all' && selected.length >= 2) {
-    selected[selected.length - 1] = generateDynamicQuestion();
-    selected[selected.length - 2] = generateDynamicQuestion();
+  // Dinamikus feladatok beszúrása (most már minden kategóriára, ahol van generátor)
+  if (selected.length >= 2) {
+    const requestedCat = category === 'all' ? undefined : category;
+    
+    // Megpróbálunk 2 dinamikus feladatot generálni az adott kategóriához
+    const dyn1 = generateDynamicQuestion(requestedCat);
+    const dyn2 = generateDynamicQuestion(requestedCat);
+
+    // Csak akkor cseréljük le az utolsó elemeket, ha a generátor adott vissza érvényes feladatot
+    if (dyn1) selected[selected.length - 1] = dyn1;
+    if (dyn2) selected[selected.length - 2] = dyn2;
+    
+    // Újrakeverjük, hogy ne mindig a végén legyenek a dinamikusak
     selected = shuffle(selected);
   }
 

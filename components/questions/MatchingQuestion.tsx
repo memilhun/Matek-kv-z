@@ -23,7 +23,8 @@ export const MatchingQuestion: React.FC<MatchingQuestionProps> = ({
   
   const rightItems = useMemo(() => 
     Object.values(pairs)
-      .map((val, id) => ({ id, val })) // Az id garantálja az egyediséget
+      // Fix: cast val to string to resolve 'unknown' type inference and allow access to localeCompare
+      .map((val, id) => ({ id, val: val as string })) // Az id garantálja az egyediséget
       .sort((a, b) => a.val.localeCompare(b.val, 'hu')), 
     [pairs]
   );
