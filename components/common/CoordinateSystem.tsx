@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GridPoint } from '../../types';
 
@@ -25,8 +26,10 @@ export const CoordinateSystem: React.FC<CoordinateSystemProps> = ({
     cy: center - y * scale,
   });
 
-  const handleClick = (e: React.MouseEvent<SVGSVGElement>) => {
+  // onPointerDown használata az azonnali válaszért (nincs 300ms tap delay)
+  const handlePointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
     if (!interactive || !onPointClick) return;
+    
     const svg = e.currentTarget;
     const rect = svg.getBoundingClientRect();
     
@@ -51,8 +54,9 @@ export const CoordinateSystem: React.FC<CoordinateSystemProps> = ({
         <svg
           viewBox={`0 0 ${size} ${size}`}
           preserveAspectRatio="xMidYMid meet"
+          // touch-none megakadályozza a görgetést, amíg a hálón babrálunk
           className={`w-full h-full select-none touch-none ${interactive ? 'cursor-crosshair active:scale-[0.98] transition-transform' : ''}`}
-          onClick={handleClick}
+          onPointerDown={handlePointerDown}
           aria-label="Interaktív koordináta-háló"
           role="application"
         >

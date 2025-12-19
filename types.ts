@@ -1,3 +1,4 @@
+
 export type QuestionType = 
   | 'mcq' 
   | 'tf' 
@@ -84,5 +85,6 @@ export interface GlobalStats {
 
 export type GameState = 'MENU' | 'PLAYING' | 'FINISHED' | 'STATS';
 
-export const STORAGE_KEY_LEADERBOARD = 'mv_lb_v2';
+// Verziózott kulcs a biztonságos helyi tároláshoz
+export const STORAGE_KEY_LEADERBOARD = 'mv_lb_v2.1_stable';
 export const GAS_URL = 'https://script.google.com/macros/s/AKfycbzrA2bTOtu7dlVLREcm7zjw4eKF42GVmNBHqqyQwtobbQRE3DQ8ZsCGd-zhmd11pnzgNg/exec';

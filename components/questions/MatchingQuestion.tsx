@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { PairValue } from '../../types';
 
@@ -16,14 +17,13 @@ export const MatchingQuestion: React.FC<MatchingQuestionProps> = ({
   pairs, showResult, onFinish 
 }) => {
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
-  // A currentPairs most a bal oldali kulcsot rendeli a jobb oldali elem ID-jéhez
   const [currentPairs, setCurrentPairs] = useState<Record<string, number>>({});
 
   const leftKeys = useMemo(() => Object.keys(pairs), [pairs]);
   
   const rightItems = useMemo(() => 
     Object.values(pairs)
-      .map((val, id) => ({ id, val }))
+      .map((val, id) => ({ id, val })) // Az id garantálja az egyediséget
       .sort((a, b) => a.val.localeCompare(b.val, 'hu')), 
     [pairs]
   );
@@ -35,7 +35,6 @@ export const MatchingQuestion: React.FC<MatchingQuestionProps> = ({
     setSelectedLeft(null);
     
     if (Object.keys(newPairs).length === leftKeys.length) {
-      // Visszaalakítás a PairValue formátumra az onFinish-hez
       const finishPayload: PairValue = Object.entries(newPairs).map(([k, rightId]) => {
         const item = rightItems.find(r => r.id === rightId);
         return { k, actual: item?.val || '' };
@@ -58,7 +57,7 @@ export const MatchingQuestion: React.FC<MatchingQuestionProps> = ({
               className={`w-full p-3 rounded-lg border-2 text-left text-sm font-bold transition-all ${
                 isSelected ? "bg-blue-600 border-blue-400 text-white shadow-lg" : 
                 isPaired ? "opacity-30 border-slate-700 bg-slate-900 text-slate-500" : 
-                "bg-slate-800 border-white/10"
+                "bg-slate-800 border-white/10 hover:border-blue-500/50"
               }`}
             >
               {left}
@@ -79,7 +78,7 @@ export const MatchingQuestion: React.FC<MatchingQuestionProps> = ({
           } else if (isPaired) {
             cls += "bg-blue-900 border-blue-500 text-blue-400";
           } else {
-            cls += "bg-slate-800 border-white/10";
+            cls += "bg-slate-800 border-white/10 " + (selectedLeft ? "hover:border-blue-500" : "opacity-50 cursor-not-allowed");
           }
           
           return (

@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { AnswerRecord, LeaderboardEntry, STORAGE_KEY_LEADERBOARD, GAS_URL } from '../types';
 import { Leaderboard } from './Leaderboard';
+import { CheckCircleIcon } from './Icons';
 
 interface ResultScreenProps {
   score: number;
@@ -42,7 +44,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
     fetch(GAS_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(data),
       keepalive: true
     }).catch(() => {});
@@ -77,13 +79,18 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
       setLeaderboard(localLb);
 
       if (GAS_URL) {
-        await fetch(GAS_URL, {
+        const response = await fetch(GAS_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+          mode: 'cors',
+          headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify(sessionData)
         });
+
+        if (!response.ok && response.status !== 0) {
+          throw new Error('Hálózati hiba');
+        }
       }
+      
       setSaved(true);
       hasSavedRef.current = true;
     } catch (e) { 
@@ -117,7 +124,6 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
               placeholder="Írd be a neved..."
               className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 outline-none focus:border-blue-500 w-full text-white"
               disabled={isSaving}
-              aria-label="Név megadása a ranglistához"
             />
             <button 
               onClick={handleSave}
@@ -127,11 +133,11 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
               {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (saveError ? "Újrapróbálkozás" : "Mentés")}
             </button>
           </div>
-          {saveError && <p className="text-red-400 text-xs text-center">Hiba történt a hálózati mentés során. A helyi ranglista frissült.</p>}
+          {saveError && <p className="text-red-400 text-xs text-center font-bold animate-pulse">A hálózati mentés sikertelen, de az eredményedet helyileg rögzítettük.</p>}
         </div>
       ) : (
         <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl text-center flex items-center justify-center gap-2 animate-bounce-subtle">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+          <CheckCircleIcon />
           Eredmény sikeresen rögzítve!
         </div>
       )}

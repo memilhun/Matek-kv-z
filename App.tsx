@@ -1,15 +1,18 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { GameState, Question, AnswerRecord, LeaderboardEntry, AnswerValue, STORAGE_KEY_LEADERBOARD, GAS_URL } from './types';
+
+import React, { useState, useMemo, useCallback, useRef } from 'react';
+import { GameState, Question, AnswerRecord, AnswerValue } from './types';
 import { questionBank, getShuffledQuestions } from './data';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultScreen } from './components/ResultScreen';
 import { StatisticsScreen } from './components/StatisticsScreen';
 import { Leaderboard } from './components/Leaderboard';
 import { useTimer } from './hooks/useTimer';
+import { GameProvider, useGameContext } from './context/GameContext';
+import { calculateEarnedPoints } from './utils/scoreCalculator';
+import { PlayIcon, StatsIcon, BookIcon } from './components/Icons';
+import { APP_VERSION } from './constants';
 
-const APP_VERSION = '1.2.0';
-
-export default function App() {
+function AppContent() {
   const [gameState, setGameState] = useState<GameState>('MENU');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -17,9 +20,8 @@ export default function App() {
   const [streak, setStreak] = useState(0); 
   const [answerHistory, setAnswerHistory] = useState<AnswerRecord[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
-  const [isLoadingLb, setIsLoadingLb] = useState(false);
   
+  const { leaderboardData, isLoadingLb, refreshLeaderboard } = useGameContext();
   const isAnswerProcessedRef = useRef(false);
 
   const handleTimeOut = useCallback(() => {
@@ -43,37 +45,6 @@ export default function App() {
       });
   }, []);
 
-  const fetchLeaderboard = async () => {
-    setIsLoadingLb(true);
-    let localLb: LeaderboardEntry[] = [];
-    try {
-      localLb = JSON.parse(localStorage.getItem(STORAGE_KEY_LEADERBOARD) || '[]');
-    } catch (e) { localLb = []; }
-
-    if (GAS_URL) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        const response = await fetch(`${GAS_URL}?action=getLeaderboard`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        const globalData = await response.json();
-        if (Array.isArray(globalData)) {
-          setLeaderboardData(globalData.map(e => ({ ...e, isGlobal: true })));
-          setIsLoadingLb(false);
-          return;
-        }
-      } catch (e) {
-        console.warn("Globális ranglista nem érhető el, helyi adatok használata.");
-      }
-    }
-    setLeaderboardData(Array.isArray(localLb) ? localLb : []);
-    setIsLoadingLb(false);
-  };
-
-  useEffect(() => {
-    if (gameState === 'MENU') fetchLeaderboard();
-  }, [gameState]);
-
   const startGame = () => {
     const qSet = getShuffledQuestions(10, selectedCategory);
     if (qSet.length === 0) { alert("Nincs kérdés ebben a témakörben."); return; }
@@ -96,14 +67,9 @@ export default function App() {
     let currentStreak = correct ? streak + 1 : 0;
     setStreak(currentStreak);
 
-    let earnedPoints = 0;
-    if (correct) {
-      let basePoints = currentQ.points;
-      const multiplier = currentStreak >= 3 ? 1.5 : (currentStreak === 2 ? 1.2 : 1);
-      const timeBonus = Math.round(timeLeft * 0.15); 
-      earnedPoints = Math.round(basePoints * multiplier) + timeBonus;
-      if (hintUsed) earnedPoints = Math.round(earnedPoints / 2);
-    }
+    const earnedPoints = correct 
+      ? calculateEarnedPoints(currentQ.points, currentStreak, timeLeft, hintUsed) 
+      : 0;
 
     setScore(prev => prev + earnedPoints);
     setAnswerHistory(prev => [...prev, {
@@ -126,6 +92,7 @@ export default function App() {
       setCurrentIndex(prev => prev + 1);
     } else {
       setGameState('FINISHED');
+      refreshLeaderboard();
     }
   };
 
@@ -161,7 +128,7 @@ export default function App() {
               <div className="bg-slate-800 p-6 md:p-10 rounded-2xl border border-blue-500/20 shadow-xl">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="p-3 bg-blue-500/20 rounded-xl text-blue-400">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /></svg>
+                    <PlayIcon />
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-white">Új Gyakorlás</h2>
@@ -198,7 +165,7 @@ export default function App() {
                   className="bg-slate-800/50 hover:bg-slate-800 p-5 rounded-2xl border border-white/5 hover:border-white/10 transition-all flex items-center gap-4 text-left group"
                 >
                   <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400 group-hover:scale-110 transition-transform">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                    <StatsIcon />
                   </div>
                   <div>
                     <h3 className="font-bold text-white leading-tight">Statisztika</h3>
@@ -208,7 +175,7 @@ export default function App() {
                 
                 <div className="bg-slate-800/30 p-5 rounded-2xl border border-white/5 flex items-center gap-4">
                   <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                    <BookIcon />
                   </div>
                   <div>
                     <h3 className="font-bold text-white leading-tight">{questionBank.length} Feladat</h3>
@@ -257,5 +224,13 @@ export default function App() {
         </footer>
       )}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <GameProvider>
+      <AppContent />
+    </GameProvider>
   );
 }

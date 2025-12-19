@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Question, AnswerValue, PairValue, SetPlacementValue, CoordinateValue } from '../types';
 import { CoordinateSystem } from './common/CoordinateSystem';
-
 import { MCQQuestion } from './questions/MCQQuestion';
 import { TFQuestion } from './questions/TFQuestion';
 import { ShortAnswerQuestion } from './questions/ShortAnswerQuestion';
@@ -9,6 +9,7 @@ import { OrderingQuestion } from './questions/OrderingQuestion';
 import { EstimationQuestion } from './questions/EstimationQuestion';
 import { MatchingQuestion } from './questions/MatchingQuestion';
 import { SetPlacementQuestion } from './questions/SetPlacementQuestion';
+import { HintIcon } from './Icons';
 
 interface QuizScreenProps {
   question: Question;
@@ -42,7 +43,6 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
 
   const normalize = (val: any) => {
     if (val === null || val === undefined) return '';
-    // Trim, collapse double spaces, swap dots to commas for consistency
     return val.toString().trim().toLowerCase().replace(/\s+/g, ' ').replace(/\./g, ',');
   };
 
@@ -59,8 +59,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
         return normalize(answer) === normalize(question.correctAnswer);
       case 'matching':
         const pairs = answer as PairValue;
-        const totalPairs = Object.keys(question.pairs).length;
-        return pairs.length === totalPairs && 
+        return Object.keys(question.pairs).length === pairs.length && 
                pairs.every(p => question.pairs[p.k] === p.actual);
       case 'ordering':
         return JSON.stringify(answer) === JSON.stringify(question.correctOrder);
@@ -111,7 +110,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
           onSelect={handleFinalAnswer}
           correct={question.correct}
           showResult={showResult}
-          selected={selectedAnswer as number}
+          selected={typeof selectedAnswer === 'number' ? selectedAnswer : null}
           eliminated={eliminatedOptions}
         />;
       case 'tf':
@@ -119,7 +118,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
           onSelect={handleFinalAnswer}
           correct={question.correct}
           showResult={showResult}
-          selected={selectedAnswer as boolean}
+          selected={typeof selectedAnswer === 'boolean' ? selectedAnswer : null}
         />;
       case 'short':
       case 'shortnum':
@@ -170,7 +169,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
     <div className="w-full max-w-2xl mx-auto space-y-6 animate-fade-in pb-10">
       <div className="flex justify-between items-start" role="status">
         <div className="text-slate-400 font-medium text-sm">
-          <span aria-label={`Kérdés ${qIndex + 1} a ${totalQ}-ból`}>{qIndex + 1} / {totalQ} Kérdés</span>
+          <span>{qIndex + 1} / {totalQ} Kérdés</span>
           <div className="flex gap-2 mt-1">
             <span className="px-2 py-0.5 bg-slate-800 rounded-lg border border-white/5 text-[10px] uppercase font-bold">{question.category}</span>
             <span className={`px-2 py-0.5 rounded-lg border border-white/5 text-[10px] font-bold uppercase ${difficultyLabels[question.difficulty].color}`}>{difficultyLabels[question.difficulty].label}</span>
@@ -181,9 +180,8 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
             onClick={handleHint} 
             disabled={hintUsed} 
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${hintUsed ? "bg-amber-500/10 border-amber-500/30 text-amber-500/50 cursor-default" : "bg-amber-500/10 border-amber-500 text-amber-400 hover:bg-amber-500/20"}`}
-            aria-label="Tipp kérése pontlevonás ellenében"
           >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+            <HintIcon />
             {hintUsed ? "Tipp használva" : "Tipp (-50%)"}
           </button>
         )}
@@ -212,7 +210,6 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
       {showResult && (
         <div 
           className={`p-6 rounded-2xl border ${checkCorrectness(selectedAnswer!) ? "bg-emerald-500/10 border-emerald-500/20" : "bg-red-500/10 border-red-500/20"} animate-fade-in shadow-xl`}
-          role="alert"
         >
           <div className="flex items-center gap-3 mb-2">
              <div className={`text-lg font-bold ${checkCorrectness(selectedAnswer!) ? "text-emerald-400" : "text-red-400"}`}>

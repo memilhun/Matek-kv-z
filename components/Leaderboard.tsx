@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { LeaderboardEntry } from '../types';
+import { TrophyIcon } from './Icons';
+import { Z_INDEX } from '../constants';
 
 interface LeaderboardProps {
   entries: LeaderboardEntry[];
@@ -13,7 +15,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, isLoading, cl
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-lg font-bold text-white flex items-center gap-2">
-          <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+          <TrophyIcon />
           Ranglista
         </h3>
         {entries.some(e => e.isGlobal) && (
@@ -23,7 +25,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries, isLoading, cl
       
       <div className="bg-slate-900/50 rounded-xl overflow-hidden border border-white/5 relative min-h-[200px]">
         {isLoading && (
-          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10">
+          <div 
+            className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center"
+            style={{ zIndex: Z_INDEX.OVERLAY }}
+          >
             <div className="flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-3 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
               <span className="text-xs text-slate-400 font-medium">Frissítés...</span>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 
 interface OrderItem {
@@ -19,18 +20,26 @@ export const OrderingQuestion: React.FC<OrderingQuestionProps> = ({
   const [result, setResult] = useState<OrderItem[]>([]);
 
   useEffect(() => {
-    // Minden elem kap egy egyedi ID-t az indexe alapján, hogy a duplikátumok megkülönböztethetőek legyenek
-    setPool(items.map((val, id) => ({ id, val })).sort(() => Math.random() - 0.5));
+    // ID alapú azonosítás a duplikátumok kezeléséhez (pl. ['1/2', '0,5', '2/4'])
+    const baseItems = items.map((val, id) => ({ id, val }));
+    
+    // Fisher-Yates shuffle a biztos véletlenszerűségért
+    const shuffled = [...baseItems];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    setPool(shuffled);
     setResult([]);
   }, [items]);
 
   const handleSelect = (item: OrderItem) => {
     const newResult = [...result, item];
     setResult(newResult);
-    setPool(pool.filter(p => p.id !== item.id));
+    setPool(pool.filter(p => p.id !== item.id)); // Csak az adott ID-jú elemet vesszük ki
     
     if (newResult.length === items.length) {
-      // Visszaalakítjuk string tömbbé az ellenőrzéshez
       onFinish(newResult.map(r => r.val));
     }
   };
