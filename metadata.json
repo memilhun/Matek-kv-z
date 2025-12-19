@@ -1,5 +1,5 @@
 {
   "name": "M5 Matek Kvíz - Átfogó Gyakorló",
-  "description": "Teljes körű interaktív matematikai alkalmazás 5. osztályosoknak. Lefedi az egész számok, koordináta-rendszer, törtek, tizedes törtek, mértékegységek, geometria és szögek témaköreit. Jellemzők: SVG alapú koordináta-háló, 5 feladattípus, tipprendszer, ranglista és részletes statisztikai elemzés.",
+  "description": "Teljes körű interaktív matematikai alkalmazás 5. osztályosoknak. Lefedi az egész számok, koordináta-rendszer, törtek, tizedes törtek, mértékegységek, geometria és szögek témaköreit. Jellemzők: SVG alapú koordináta-háló, 10 interaktív feladattípus, tipprendszer, ranglista és részletes statisztikai elemzés.",
   "requestFramePermissions": []
 }
