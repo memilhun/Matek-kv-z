@@ -5,7 +5,7 @@ Ez egy modern, mobil-optimalizált React-alapú oktatási alkalmazás, amely seg
 
 ## 📚 Oktatási Tartalom
 
-A feladatbank (150+ kérdés) az alábbi fő kategóriákat fedi le:
+A feladatbank (150+ statikus kérdés + végtelen dinamikus variáció) az alábbi fő kategóriákat fedi le:
 1. **Természetes számok** (Helyiérték, kerekítés, római számok)
 2. **Geometriai alapismeretek** (Vonalak, kör, sokszögek)
 3. **Mérés, statisztika** (Mértékegységek, becslés, átlagszámítás)
@@ -17,15 +17,26 @@ A feladatbank (150+ kérdés) az alábbi fő kategóriákat fedi le:
 9. **Egész számok** (Abszolút érték, ellentett, összeadás és kivonás a negatív tartományban)
 10. **Helymeghatározás** (Koordináta-rendszer, tükrözés, síknegyedek)
 
+## 🎲 Dinamikus Feladatgenerálás (ÚJ)
+
+Az alkalmazás egy intelligens generátort (`dynamicGenerator`) használ, amely minden 10 kérdéses körben **legalább 2 teljesen egyedi feladatot** szúr be. Ez biztosítja, hogy a tanulók ne csak bemagolják a válaszokat, hanem valóban értsék a műveleteket.
+
+Dinamikus generálás az alábbi témakörökben érhető el:
+- **Számolás:** Alapműveletek, kerekítés, római számok, egész számok összeadása.
+- **Mérés:** Véletlenszerű mértékegység-átváltások (hossz, tömeg, űrtartalom).
+- **Geometria:** Háromszög hiányzó szögei, téglalap kerület/terület számítás.
+- **Törtek:** Törtrész kiszámítása, egyszerűsítés.
+- **Koordináták:** Pontok tükrözése az x és y tengelyre.
+
 ## 🎮 10 Interaktív Feladattípus
 
 Az alkalmazás változatos beviteli módokat kínál a figyelem fenntartásához:
 - **MCQ**: Négyválasztós feleletválasztó.
 - **TF**: Igaz/Hamis állítások.
-- **Short/Shortnum**: Szöveges vagy numerikus válasz beírása.
-- **Ordering**: Elemek sorrendbe rendezése (növekvő, csökkenő, időrend).
+- **Short/Shortnum**: Szöveges vagy numerikus válasz beírása (beépített törtvonal gombbal).
+- **Ordering**: Elemek sorrendbe rendezése.
 - **Matching**: Fogalompárok összekötése.
-- **Set Placement**: Elemek besorolása halmazábrába (A, B, Mindkettő, Egyik sem).
+- **Set Placement**: Elemek besorolása halmazábrába.
 - **Estimation**: Érték becslése interaktív csúszkával.
 - **Plan Selector**: Szöveges feladathoz tartozó műveleti terv kiválasztása.
 - **Coordinate Picker**: Kattintás a pontos koordinátára egy interaktív SVG hálón.
@@ -33,24 +44,25 @@ Az alkalmazás változatos beviteli módokat kínál a figyelem fenntartásához
 
 ## 🏆 Játékmechanika és Pontozás
 
-Az algoritmus jutalmazza a sebességet és a pontosságot:
-- **Alappont**: A feladat nehézségétől függ (50-250 pont).
-- **Streak-szorzó**: 3 helyes válasz után 1.5x szorzó jár.
-- **Időbónusz**: A hátralévő másodpercek után extra pontok.
-- **Tipprendszer**: A "Tipp" gomb segít (pl. felezi a lehetőségeket), de 50%-os pontlevonással jár.
+A pontszámítás (`scoreCalculator.ts`) jutalmazza a pontosságot, a sorozatokat és a gyorsaságot:
+- **Alappont**: 50 - 250 pont (nehézségtől függően).
+- **Streak-szorzó**: 
+    - 2 egymást követő helyes válasz: **1.2x szorzó**.
+    - 3 vagy több helyes válasz: **1.5x szorzó**.
+- **Időbónusz**: Minden hátralévő másodperc **+0.15 pontot** ér.
+- **Tipprendszer**: A "Tipp" gomb segít, de az adott feladatra járó **összpontszámot felezi (50% levonás)**.
 
 ## 🛠 Technikai Jellemzők
 
-- **Mobil UX**: Az `Ordering` feladatnál bevezetett **Undo (Visszavonás)** gomb és az ID-alapú követés megakadályozza a véletlen kattintásokból eredő hibákat.
-- **Precíziós Koordináta-rendszer**: SVG alapú háló, amely figyelembe veszi a képernyő skálázását és görgetését, valamint a javítás után megmutatja a helyes célpontot.
-- **Teljesítmény**: A `useTimer` hook optimalizált, csak másodpercenként egyszer frissíti a UI-t, elkerülve a felesleges re-rendereket.
+- **Dinamikus Injekció**: A `getShuffledQuestions` algoritmus kategória-specifikusan választ generátort, így a témakörökön belüli gyakorlás is változatos marad.
+- **Mobil UX**: 
+    - Az `Ordering` feladatnál **Undo (Visszavonás)** funkció.
+    - Speciális `inputMode="decimal"` a numerikus bevitelnél mobil billentyűzethez.
+    - Törtvonal (/) gyorsbillentyű a beviteli mező mellett.
+- **Precíziós Koordináta-rendszer**: SVG alapú háló, amely hiba esetén megmutatja a helyes célpontot.
 - **Statisztika**: 
-    - *Lokális*: A feladatbank aktuális eloszlásának elemzése.
-    - *Globális*: Felhőalapú adatok a legnehezebb kérdésekről és az országos átlagról.
-
-## 🌐 Online Működés (Google Apps Script)
-
-Az alkalmazás képes hálózati ranglista és statisztika kezelésére. A beállításhoz kövesse a `types.ts` fájlban található `GAS_URL` konfigurációt a README alján található script segítségével.
+    - *Bank*: A feladatbank statikus és dinamikus eloszlásának elemzése.
+    - *Globális*: Felhőalapú adatok (Google Sheets) a legnehezebb kérdésekről.
 
 ---
 *Verzió: 1.3.0 | Matematika Gyakorló Alkalmazás*
