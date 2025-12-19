@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 
 interface UseTimerProps {
@@ -42,7 +43,8 @@ export const useTimer = ({ initialTime, onTimeOut, isActive }: UseTimerProps) =>
         setTimeLeft(0);
         onTimeOutRef.current();
       } else {
-        setTimeLeft(remaining);
+        // Csak akkor frissítünk, ha változott az egész másodperc értéke
+        setTimeLeft(prev => (prev !== remaining ? remaining : prev));
       }
     }, 200);
 

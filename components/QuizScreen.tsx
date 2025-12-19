@@ -199,6 +199,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
               handleFinalAnswer({x, y});
             }}
             userSelected={pickedPoint}
+            correctTarget={showResult && question.type === 'coordinate_picker' ? question.target : null}
            />
          )}
       </div>

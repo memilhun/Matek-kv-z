@@ -57,7 +57,7 @@ function AppContent() {
     setGameState('PLAYING');
   };
 
-  const handleAnswer = (given: AnswerValue | null, correct: boolean, hintUsed: boolean) => {
+  const handleAnswer = (given: AnswerValue, correct: boolean, hintUsed: boolean) => {
     if (isAnswerProcessedRef.current) return;
     isAnswerProcessedRef.current = true;
     

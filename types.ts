@@ -53,7 +53,8 @@ export type AnswerValue =
   | PairValue 
   | string[] 
   | SetPlacementValue
-  | CoordinateValue;
+  | CoordinateValue
+  | null;
 
 export interface AnswerRecord {
   questionId: string;

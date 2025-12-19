@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AnswerRecord, LeaderboardEntry, STORAGE_KEY_LEADERBOARD, GAS_URL } from '../types';
 import { Leaderboard } from './Leaderboard';
 import { CheckCircleIcon } from './Icons';
+import { useGameContext } from '../context/GameContext';
 
 interface ResultScreenProps {
   score: number;
@@ -18,6 +19,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
   const [saveError, setSaveError] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   
+  const { refreshLeaderboard } = useGameContext();
   const hasSavedRef = useRef(false);
 
   const getSessionData = (userName: string) => ({
@@ -29,6 +31,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
     history: history.map(h => ({
       id: h.questionId,
       text: h.questionText,
+      given: h.given,
       correct: h.correct,
       time: h.timeSpent,
       hint: h.hintUsed,
@@ -90,6 +93,9 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
           throw new Error('Hálózati hiba');
         }
       }
+      
+      // Frissítjük a globális context-et, hogy a menü ranglistája is szinkronban legyen
+      await refreshLeaderboard();
       
       setSaved(true);
       hasSavedRef.current = true;
