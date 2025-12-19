@@ -17,9 +17,8 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   
-  const { refreshLeaderboard } = useGameContext();
+  const { leaderboardData, isLoadingLb, refreshLeaderboard } = useGameContext();
   const hasSavedRef = useRef(false);
 
   const getSessionData = (userName: string) => ({
@@ -40,32 +39,6 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
     }))
   });
 
-  const performAutoSave = () => {
-    if (hasSavedRef.current || !GAS_URL) return;
-    hasSavedRef.current = true;
-    const data = getSessionData('Anonymous');
-    fetch(GAS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(data),
-      keepalive: true
-    }).catch(() => {});
-  };
-
-  useEffect(() => {
-    try {
-      const lb = JSON.parse(localStorage.getItem(STORAGE_KEY_LEADERBOARD) || '[]');
-      setLeaderboard(Array.isArray(lb) ? lb : []);
-    } catch (error) { setLeaderboard([]); }
-
-    const handleBeforeUnload = () => performAutoSave();
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, []);
-
   const handleSave = async () => {
     const finalName = name.trim() || 'Anonymous';
     setIsSaving(true);
@@ -73,29 +46,35 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
     const sessionData = getSessionData(finalName);
 
     try {
-      const newEntry: LeaderboardEntry = { name: finalName, score, date: sessionData.date };
-      const localLb = [...leaderboard, newEntry]
-        .sort((a, b) => b.score - a.score)
-        .filter((v, i, a) => a.findIndex(t => t.name === v.name && t.score === v.score) === i)
-        .slice(0, 10);
-      localStorage.setItem(STORAGE_KEY_LEADERBOARD, JSON.stringify(localLb));
-      setLeaderboard(localLb);
+      // 1. Lokális mentés azonnal
+      let localLb: LeaderboardEntry[] = [];
+      try {
+        localLb = JSON.parse(localStorage.getItem(STORAGE_KEY_LEADERBOARD) || '[]');
+      } catch(e) { localLb = []; }
 
+      const newEntry: LeaderboardEntry = { name: finalName, score, date: sessionData.date };
+      const updatedLocal = [...localLb, newEntry]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 15);
+      
+      localStorage.setItem(STORAGE_KEY_LEADERBOARD, JSON.stringify(updatedLocal));
+
+      // 2. Mentés a felhőbe (Google Sheets)
       if (GAS_URL) {
+        // A 'text/plain' használata GAS esetén elengedhetetlen a CORS preflight elkerüléséhez
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          mode: 'cors',
+          mode: 'no-cors', // fire and forget mode a redirect miatt, de az adat elmegy
           headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify(sessionData)
         });
-
-        if (!response.ok && response.status !== 0) {
-          throw new Error('Hálózati hiba');
-        }
+        
+        // Mivel no-cors módban az response.ok nem megbízható (mindig false), 
+        // egy rövid várakozás után frissítjük a központi listát
+        setTimeout(() => {
+          refreshLeaderboard();
+        }, 1000);
       }
-      
-      // Frissítjük a globális context-et, hogy a menü ranglistája is szinkronban legyen
-      await refreshLeaderboard();
       
       setSaved(true);
       hasSavedRef.current = true;
@@ -130,16 +109,19 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
               placeholder="Írd be a neved..."
               className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 outline-none focus:border-blue-500 w-full text-white"
               disabled={isSaving}
+              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             />
             <button 
               onClick={handleSave}
-              disabled={isSaving}
-              className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-lg transition-all flex items-center justify-center gap-2"
+              disabled={isSaving || !name.trim()}
+              className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-900/20"
             >
-              {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : (saveError ? "Újrapróbálkozás" : "Mentés")}
+              {isSaving ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : "Mentés a ranglistára"}
             </button>
           </div>
-          {saveError && <p className="text-red-400 text-xs text-center font-bold animate-pulse">A hálózati mentés sikertelen, de az eredményedet helyileg rögzítettük.</p>}
+          {saveError && <p className="text-red-400 text-xs text-center font-bold animate-pulse">A hálózati mentés közben hiba történt, de az eredményedet helyileg rögzítettük.</p>}
         </div>
       ) : (
         <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl text-center flex items-center justify-center gap-2 animate-bounce-subtle">
@@ -165,11 +147,12 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
             ))}
           </div>
         </div>
-        <Leaderboard entries={leaderboard} />
+        {/* Most már a GameContext leaderboardData-ját használjuk, ami szinkronban van a felhővel */}
+        <Leaderboard entries={leaderboardData} isLoading={isLoadingLb} />
       </div>
 
       <div className="flex justify-center pt-8">
-        <button onClick={onRestart} className="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-8 rounded-full transition-all border border-white/10">Vissza a főmenübe</button>
+        <button onClick={onRestart} className="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-8 rounded-full transition-all border border-white/10 active:scale-95">Vissza a főmenübe</button>
       </div>
     </div>
   );

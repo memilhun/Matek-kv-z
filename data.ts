@@ -10,6 +10,7 @@ import { rectangularPrismQuestions } from './data/rectangular_prism';
 import { decimalQuestions } from './data/decimals';
 import { integerQuestions } from './data/integers';
 import { coordinateQuestions } from './data/coordinates';
+import { generateDynamicQuestion } from './utils/dynamicGenerator';
 
 const rawQuestionBank: Question[] = [
   ...naturalNumberQuestions,
@@ -24,12 +25,8 @@ const rawQuestionBank: Question[] = [
   ...coordinateQuestions
 ];
 
-/**
- * Helper to validate a single question object.
- */
 function validateQuestion(q: Question): boolean {
   if (!q.id || !q.question || !q.type || !q.category || !q.difficulty) return false;
-
   switch (q.type) {
     case 'mcq':
     case 'plan_selector':
@@ -54,12 +51,8 @@ function validateQuestion(q: Question): boolean {
   }
 }
 
-// Validált bank létrehozása egyszer, a betöltéskor
 export const questionBank: Question[] = rawQuestionBank.filter(validateQuestion);
 
-/**
- * Fisher-Yates shuffle algorithm for reliable randomness.
- */
 function shuffle<T>(array: T[]): T[] {
   const result = [...array];
   for (let i = result.length - 1; i > 0; i--) {
@@ -74,5 +67,14 @@ export function getShuffledQuestions(count: number = 10, category: string = 'all
     ? questionBank 
     : questionBank.filter(q => q.category === category);
   
-  return shuffle(pool).slice(0, count);
+  let selected = shuffle(pool).slice(0, count);
+
+  // Ha a 'Vegyes' kategóriát választják, dobjunk be 2 véletlenszerűen generált feladatot is
+  if (category === 'all' && selected.length >= 2) {
+    selected[selected.length - 1] = generateDynamicQuestion();
+    selected[selected.length - 2] = generateDynamicQuestion();
+    selected = shuffle(selected);
+  }
+
+  return selected;
 }

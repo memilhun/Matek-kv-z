@@ -18,7 +18,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoadingLb(true);
     let localLb: LeaderboardEntry[] = [];
     try {
-      localLb = JSON.parse(localStorage.getItem(STORAGE_KEY_LEADERBOARD) || '[]');
+      const stored = localStorage.getItem(STORAGE_KEY_LEADERBOARD);
+      localLb = stored ? JSON.parse(stored) : [];
     } catch (e) { 
       localLb = []; 
     }
@@ -26,19 +27,31 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (GAS_URL) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        const response = await fetch(`${GAS_URL}?action=getLeaderboard`, { signal: controller.signal });
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        
+        // cache: 'no-cache' biztosítja, hogy a legfrissebb táblázat-adatokat kapjuk
+        const response = await fetch(`${GAS_URL}?action=getLeaderboard&t=${Date.now()}`, { 
+          signal: controller.signal,
+          cache: 'no-cache'
+        });
+        
         clearTimeout(timeoutId);
-        const globalData = await response.json();
-        if (Array.isArray(globalData)) {
-          setLeaderboardData(globalData.map(e => ({ ...e, isGlobal: true })));
-          setIsLoadingLb(false);
-          return;
+        
+        if (response.ok) {
+          const globalData = await response.json();
+          if (Array.isArray(globalData) && globalData.length > 0) {
+            // Globális adatok megjelölése
+            setLeaderboardData(globalData.map(e => ({ ...e, isGlobal: true })));
+            setIsLoadingLb(false);
+            return;
+          }
         }
       } catch (e) {
-        console.warn("Globális ranglista nem érhető el, helyi adatok használata.");
+        console.warn("Globális ranglista nem érhető el időtúllépés vagy CORS miatt. Helyi adatok megjelenítése.");
       }
     }
+    
+    // Fallback a lokális adatokra
     setLeaderboardData(Array.isArray(localLb) ? localLb : []);
     setIsLoadingLb(false);
   }, []);

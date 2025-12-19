@@ -20,6 +20,7 @@ function AppContent() {
   const [streak, setStreak] = useState(0); 
   const [answerHistory, setAnswerHistory] = useState<AnswerRecord[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [statsTab, setStatsTab] = useState<'bank' | 'global'>('global');
   
   const { leaderboardData, isLoadingLb, refreshLeaderboard } = useGameContext();
   const isAnswerProcessedRef = useRef(false);
@@ -96,6 +97,11 @@ function AppContent() {
     }
   };
 
+  const openStats = (tab: 'bank' | 'global') => {
+    setStatsTab(tab);
+    setGameState('STATS');
+  };
+
   return (
     <div className="min-h-screen font-sans text-slate-100 flex flex-col overflow-x-hidden">
       <header className="p-4 md:p-6 flex items-center justify-between max-w-6xl mx-auto w-full">
@@ -161,27 +167,30 @@ function AppContent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button 
-                  onClick={() => setGameState('STATS')} 
+                  onClick={() => openStats('global')} 
                   className="bg-slate-800/50 hover:bg-slate-800 p-5 rounded-2xl border border-white/5 hover:border-white/10 transition-all flex items-center gap-4 text-left group"
                 >
                   <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400 group-hover:scale-110 transition-transform">
                     <StatsIcon />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white leading-tight">Statisztika</h3>
+                    <h3 className="font-bold text-white leading-tight">Globális Statisztika</h3>
                     <p className="text-slate-500 text-xs">Eredmények elemzése</p>
                   </div>
                 </button>
                 
-                <div className="bg-slate-800/30 p-5 rounded-2xl border border-white/5 flex items-center gap-4">
-                  <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400">
+                <button 
+                  onClick={() => openStats('bank')} 
+                  className="bg-slate-800/50 hover:bg-slate-800 p-5 rounded-2xl border border-white/5 hover:border-white/10 transition-all flex items-center gap-4 text-left group"
+                >
+                  <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400 group-hover:scale-110 transition-transform">
                     <BookIcon />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white leading-tight">{questionBank.length} Feladat</h3>
-                    <p className="text-slate-500 text-xs">A teljes adatbázisban</p>
+                    <h3 className="font-bold text-white leading-tight">Feladatbank Eloszlása</h3>
+                    <p className="text-slate-500 text-xs">{questionBank.length} db feladat</p>
                   </div>
-                </div>
+                </button>
               </div>
             </div>
 
@@ -193,7 +202,13 @@ function AppContent() {
           </div>
         )}
 
-        {gameState === 'STATS' && <StatisticsScreen questions={questionBank} onBack={() => setGameState('MENU')} />}
+        {gameState === 'STATS' && (
+          <StatisticsScreen 
+            questions={questionBank} 
+            initialTab={statsTab}
+            onBack={() => setGameState('MENU')} 
+          />
+        )}
         
         {gameState === 'PLAYING' && questions[currentIndex] && (
           <QuizScreen 

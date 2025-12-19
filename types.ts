@@ -25,6 +25,7 @@ interface BaseQuestion {
   points: number;
   question: string;
   explanation?: string;
+  isDynamic?: boolean;
   gridConfig?: {
     points: GridPoint[];
     highlight?: string;
@@ -67,6 +68,7 @@ export interface AnswerRecord {
   category?: string;
   timeSpent?: number;
   hintUsed?: boolean;
+  isDynamic?: boolean;
 }
 
 export interface LeaderboardEntry {

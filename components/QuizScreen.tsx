@@ -170,9 +170,15 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
       <div className="flex justify-between items-start" role="status">
         <div className="text-slate-400 font-medium text-sm">
           <span>{qIndex + 1} / {totalQ} Kérdés</span>
-          <div className="flex gap-2 mt-1">
+          <div className="flex flex-wrap gap-2 mt-1">
             <span className="px-2 py-0.5 bg-slate-800 rounded-lg border border-white/5 text-[10px] uppercase font-bold">{question.category}</span>
             <span className={`px-2 py-0.5 rounded-lg border border-white/5 text-[10px] font-bold uppercase ${difficultyLabels[question.difficulty].color}`}>{difficultyLabels[question.difficulty].label}</span>
+            {question.isDynamic && (
+              <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-[10px] font-black uppercase tracking-tight flex items-center gap-1 shadow-[0_0_8px_rgba(168,85,247,0.2)]">
+                <span className="w-1 h-1 bg-purple-400 rounded-full animate-pulse"></span>
+                Dinamikus
+              </span>
+            )}
           </div>
         </div>
         {!showResult && (

@@ -5,11 +5,12 @@ import { BankIcon, TypeIcon } from './Icons';
 
 interface StatisticsScreenProps {
   questions: Question[];
+  initialTab?: 'bank' | 'global';
   onBack: () => void;
 }
 
-export const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ questions, onBack }) => {
-  const [tab, setTab] = useState<'bank' | 'global'>('bank');
+export const StatisticsScreen: React.FC<StatisticsScreenProps> = ({ questions, initialTab = 'bank', onBack }) => {
+  const [tab, setTab] = useState<'bank' | 'global'>(initialTab);
   const [globalData, setGlobalData] = useState<GlobalStats | null>(null);
   const [loading, setLoading] = useState(false);
 
