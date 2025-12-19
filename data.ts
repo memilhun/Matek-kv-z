@@ -1,4 +1,3 @@
-
 import { Question, GridPoint } from './types';
 
 // Standard point sets for reuse in Coordinate questions
@@ -16,8 +15,7 @@ const gridSet2: GridPoint[] = [
   {label: 'S', x: -5, y: 0}
 ];
 
-export const questionBank: Question[] = [
-  // --- INTERAKTÍV ÚJDONSÁGOK (BŐVÍTÉS) ---
+const rawQuestionBank: Question[] = [
   {
     id: 'set_div_2', category: '1. Természetes számok', difficulty: 'hard', type: 'set_placement', time: 60, points: 250,
     question: 'Helyezd el a számokat az oszthatósági halmazábrán!',
@@ -77,8 +75,6 @@ export const questionBank: Question[] = [
     correct: 0,
     explanation: 'Előbb kiszámoljuk a 3/8 részt (24:8*3), majd ezt kivonjuk az egészből (24).'
   },
-
-  // --- KORÁBBI FELADATOK ---
   {
     id: 'ord_frac_1', category: '5. A törtszámok', difficulty: 'medium', type: 'ordering', time: 40, points: 150,
     question: 'Rendezd növekvő sorrendbe az alábbi törteket!',
@@ -118,8 +114,6 @@ export const questionBank: Question[] = [
     target: { x: 3, y: -2, label: 'P' },
     explanation: 'Lépj 3-at jobbra az x tengelyen, majd 2-t lefelé az y tengely mentén.'
   },
-
-  // --- 9. Az egész számok ---
   {id:'int_add_sub_1',category:'9. Az egész számok',difficulty:'easy',type:'mcq',time:20,points:50,question:'Mennyi: (−5) + (−9) ?',options:['−14','4','−4','14'],correct:0,explanation:'Ha két negatív számot adunk össze, az eredmény is negatív lesz. Összeadjuk a számok abszolút értékét: 5 + 9 = 14, tehát az eredmény −14.'},
   {id:'int_add_sub_2',category:'9. Az egész számok',difficulty:'easy',type:'mcq',time:20,points:50,question:'Mennyi: 8 + (−3) ?',options:['5','11','−5','−11'],correct:0,explanation:'Negatív szám hozzáadása olyan, mintha kivonnánk a számot. Tehát 8-ból elveszünk 3-at, ami 5.'},
   {id:'int_add_sub_3',category:'9. Az egész számok',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Mennyi: (−12) + 7 ?',correctAnswer:'-5',explanation:'A −12-ről indulunk a számegyenesen, és 7-et lépünk jobbra (pozitív irányba). Még mindig a negatív oldalon vagyunk: −5.'},
@@ -176,8 +170,6 @@ export const questionBank: Question[] = [
   {id:'int_theory_1',category:'9. Az egész számok',difficulty:'easy',type:'mcq',time:20,points:50,question:'Mit jelent a számok írásában a helyiérték?',options:['A számjegy alakja','A számjegy helye a számban','A számjegy színe','A szám hossza'],correct:1,explanation:'Ugyanaz a számjegy mást ér, ha hátul áll (egyes), vagy ha elöl (pl. ezres). Ezt nevezzük helyiértéknek.'},
   {id:'int_theory_2',category:'9. Az egész számok',difficulty:'medium',type:'tf',time:20,points:100,question:'Igaz vagy hamis: A 0 (nulla) természetes szám.',correct:true,explanation:'Igen, a természetes számok a 0, 1, 2, 3... és így tovább a végtelenig.'},
   {id:'int_theory_3',category:'9. Az egész számok',difficulty:'medium',type:'mcq',time:20,points:100,question:'Melyik műveletnél cserélhetjük fel a számokat (kommutativitás)?',options:['Kivonásnál','Osztásnál','Összeadásnál','Hatványozásnál'],correct:2,explanation:'5 + 3 ugyanannyi, mint 3 + 5. De a kivonásnál ez nem igaz.'},
-
-  // --- 10. Helymeghatározás ---
   {
     id: 'coord_1', category: '10. Helymeghatározás', difficulty: 'easy', type: 'mcq', time: 30, points: 50,
     gridConfig: { points: gridSet1, highlight: 'A' },
@@ -293,7 +285,7 @@ export const questionBank: Question[] = [
     question: 'Ha a (-5; 1) pontot tükrözzük az y tengelyre, mi lesz a képe?',
     options: ['(5; 1)', '(-5; -1)', '(5; -1)', '(1; -5)'],
     correct: 0,
-    explanation: 'Y tengelyre való tükrözéskor az y koordináta marad, az x az ellentettjére változik. (5; 1).'
+    explanation: 'Y tengelyre tükrözéskor az y koordináta marad, az x az ellentettjére változik. (5; 1).'
   },
   {
     id: 'coord_new_7', category: '10. Helymeghatározás', difficulty: 'hard', type: 'mcq', time: 35, points: 200,
@@ -354,8 +346,6 @@ export const questionBank: Question[] = [
     correctAnswer: '5',
     explanation: 'A -2-től a 0-ig 2 lépés, onnan a 3-ig még 3 lépés. Összesen 2 + 3 = 5.'
   },
-
-  // --- 5. A törtszámok ---
   {
     id: 'frac_concept_1', category: '5. A törtszámok', difficulty: 'easy', type: 'mcq', time: 20, points: 50,
     question: 'Hogy nevezzül a törtvonal alatti számot?',
@@ -631,8 +621,8 @@ export const questionBank: Question[] = [
     explanation: '1 óra = 60 perc. 1/4 óra = 15 perc (60:4). 3/4 óra = 3 · 15 = 45 perc.'
   },
   {
-    id: 'frac_part_4', category: '5. A törtszámok', difficulty: 'medium', type: 'shortnum', time: 30, points: 100,
-    question: 'Mennyi 24-nek a 2/3 része?',
+    id: 'frac_part_4', category: '5. A törtszámok', difficulty: 'medium', type: 'mcq', time: 30, points: 100,
+    question: 'Mennyi 24-nak a 2/3 része?',
     options: ['12', '16', '18', '8'],
     correct: 1,
     explanation: '24 egyharmada 8 (24:3). A kétharmada ennek a duplája: 16.'
@@ -711,7 +701,7 @@ export const questionBank: Question[] = [
   },
   {
     id: 'frac_line_9', category: '5. A törtszámok', difficulty: 'medium', type: 'shortnum', time: 30, points: 100,
-    question: 'Ha egy 12 cm-es szakaszt 3 egyenlő részre osztunk, hány cm a 2/3 része?',
+    question: 'Ha a 12 cm-es szakaszt 3 egyenlő részre osztunk, hány cm a 2/3 része?',
     correctAnswer: '8',
     explanation: 'A 12 cm harmada 4 cm. Két harmada ennek a duplája: 8 cm.'
   },
@@ -724,8 +714,6 @@ export const questionBank: Question[] = [
   },
   {id:'frac_theory_1',category:'5. A törtszámok',difficulty:'easy',type:'mcq',time:20,points:50,question:'Mi történik a tört értékével, ha bővítjük?',options:['Nő','Csökken','Nem változik','Nullára változik'],correct:2,explanation:'Bővítéskor csak a szeletek számát és méretét változtatjuk, de az egész mennyiség ugyanannyi marad.'},
   {id:'frac_theory_2',category:'5. A törtszámok',difficulty:'easy',type:'mcq',time:20,points:50,question:'Mikor nevezünk egy törtet valódi törtnek?',options:['Ha a számláló kisebb, mint a nevező','Ha a számláló nagyobb','Ha egyenlőek','Ha a nevező 1'],correct:0,explanation:'A valódi tört értéke kisebb, mint 1 egész. Ha a számláló nagyobb, az már "ál-tört".'},
-
-  // --- 1. Természetes számok ---
   {id:'nat_pv_1',category:'1. Természetes számok',difficulty:'easy',type:'shortnum',time:25,points:50,question:'Melyik számjegy áll a tízezresek helyén a 452 719 számban?',correctAnswer:'5',explanation:'A helyiértékek jobbról balra: egyes, tízes, százas, ezres, tízezres. A tízezresek helyén az 5 áll.'},
   {id:'nat_pv_2',category:'1. Természetes számok',difficulty:'medium',type:'mcq',time:30,points:100,question:'Hogyan írjuk le számjegyekkel: hárommillió-ötszázezer?',options:['3 500 000','3 050 000','300 500','35 000 000'],correct:0,explanation:'3 millió és 500 ezer. Tehát: 3 500 000.'},
   {id:'nat_pv_3',category:'1. Természetes számok',difficulty:'hard',type:'mcq',time:30,points:200,question:'Melyik számban a legnagyobb a 7-es helyiértéke?',options:['7 240','3 750','9 170','2 007'],correct:0,explanation:'A 7 240-ben ezresek helyén van (értéke 7000), a többiben kevesebb. Az alaki érték mindegyikben ugyanaz (7).'},
@@ -737,7 +725,7 @@ export const questionBank: Question[] = [
   {id:'nat_round_4',category:'1. Természetes számok',difficulty:'hard',type:'tf',time:25,points:200,question:'Igaz vagy hamis: A 999 tizesre kerekítve 1000.',correct:true,explanation:'Igaz. A 9-es miatt felfelé kerekítünk. A 99 tízesből 100 tízes lesz, ami 1000.'},
   {id:'nat_round_5',category:'1. Természetes számok',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Mennyi 249 tízesre kerekítve?',correctAnswer:'250',explanation:'A végén lévő 9-es miatt felfelé kerekítünk: 250.'},
   {id:'nat_roman_1',category:'1. Természetes számok',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Mennyi a római MCXL értéke arab számokkal?',correctAnswer:'1140',explanation:'M=1000, C=100. XL=40 (az X az L előtt van, tehát kivonjuk). Összeg: 1000+100+40=1140.'},
-  {id:'nat_roman_2',category:'1. Természetes számok',difficulty:'easy',type:'mcq',time:25,points:50,question:'Melyik római szám jelöli az 50-et?',options:['L','C','D','X'],correct:0,explanation:'Jegyezd meg: L = 50. (C=100, D=500, X=10).'},
+  {id:'nat_roman_2',category:'1. Természetes számok',difficulty:'easy',type:'mcq',time:25,points:50,question:'Melyik római szám jelöli az 50-et?',options:['L','C','D','X'],correct:0,explanation:'L = 50. (C=100, D=500, X=10).'},
   {id:'nat_roman_3',category:'1. Természetes számok',difficulty:'hard',type:'mcq',time:30,points:200,question:'Hogyan írjuk le a 2024-et római számokkal?',options:['MMXXIV','MMXIV','MXXIV','MMXXVI'],correct:0,explanation:'MM = 2000, XX = 20, IV = 4. Egymás mellé írva: MMXXIV.'},
   {id:'nat_roman_4',category:'1. Természetes számok',difficulty:'easy',type:'tf',time:20,points:50,question:'Igaz vagy hamis: A IX értéke 11.',correct:false,explanation:'Hamis. Mivel az I (1) a X (10) előtt van, ki kell vonni. 10 - 1 = 9.'},
   {id:'nat_roman_5',category:'1. Természetes számok',difficulty:'medium',type:'matching',time:30,points:100,question:'Párosítsd az értékeket:',pairs:{'XV':'15','XIX':'19','XXX':'30'},explanation:'XV = 10+5; XIX = 10+(10-1); XXX = 10+10+10.'},
@@ -749,8 +737,6 @@ export const questionBank: Question[] = [
   {id:'nat_theory_1',category:'1. Természetes számok',difficulty:'easy',type:'mcq',time:20,points:50,question:'Mit jelent a számok írásában a helyiérték?',options:['A számjegy alakja','A számjegy helye a számban','A számjegy színe','A szám hossza'],correct:1,explanation:'Ugyanaz a számjegy mást ér, ha hátul áll (egyes), vagy ha elöl (pl. ezres). Ezt nevezzük helyiértéknek.'},
   {id:'nat_theory_2',category:'1. Természetes számok',difficulty:'easy',type:'tf',time:20,points:50,question:'Igaz vagy hamis: A 0 (nulla) természetes szám.',correct:true,explanation:'Igen, a természetes számok a 0, 1, 2, 3... és így tovább a végtelenig.'},
   {id:'nat_theory_3',category:'1. Természetes számok',difficulty:'medium',type:'mcq',time:20,points:100,question:'Melyik műveletnél cserélhetjük fel a számokat (kommutativitás)?',options:['Kivonásnál','Osztásnál','Összeadásnál','Hatványozásnál'],correct:2,explanation:'5 + 3 ugyanannyi, mint 3 + 5. De a kivonásnál ez nem igaz.'},
-
-  // --- 2. Geometriai alapismeretek ---
   {id:'geo_line_1',category:'2. Geometriai alapismeretek',difficulty:'easy',type:'shortnum',time:20,points:50,question:'Hány végpontja van egy egyenesnek?',correctAnswer:'0',explanation:'Az egyenes mindkét irányban a végtelenbe nyúlik, nincs vége.'},
   {id:'geo_line_2',category:'2. Geometriai alapismeretek',difficulty:'easy',type:'shortnum',time:20,points:50,question:'Hány végpontja van egy szakasznak?',correctAnswer:'2',explanation:'A szakasz két pont közötti legrövidebb út, mindkét végén van egy végpont.'},
   {id:'geo_line_3',category:'2. Geometriai alapismeretek',difficulty:'medium',type:'shortnum',time:20,points:100,question:'Hány végpontja van egy félegyenesnek?',correctAnswer:'1',explanation:'A félegyenesnek van egy kezdőpontja, de a másik irányba a végtelenbe tart.'},
@@ -773,8 +759,6 @@ export const questionBank: Question[] = [
   {id:'geo_poly_5',category:'2. Geometriai alapismeretek',difficulty:'hard',type:'shortnum',time:30,points:200,question:'Hány átló húzható egy csúcsból egy négyszögben?',correctAnswer:'1',explanation:'A szomszédos csúcsokba oldal vezet, csak a szemközti csúcsba húzhatunk átlót. Négyszögnél ez 1 db.'},
   {id:'geo_theory_1',category:'2. Geometriai alapismeretek',difficulty:'easy',type:'tf',time:20,points:50,question:'Igaz vagy hamis: A félegyenesnek két végpontja van.',correct:false,explanation:'A félegyenesnek csak egy kezdőpontja van, a másik irányba a végtelenbe nyúlik. A szakasznak van két végpontja.'},
   {id:'geo_theory_2',category:'2. Geometriai alapismeretek',difficulty:'medium',type:'mcq',time:25,points:100,question:'Mit nevezünk a kör húrjának?',options:['A körvonalat','A kör középpontját','A kör két pontját összekötő szakaszt','A körön kívüli egyenest'],correct:2,explanation:'Bármely két pontot összeköthetsz a körvonalon, ez a húr. A leghosszabb húr az átmérő.'},
-
-  // --- 4. A szögek ---
   {id:'ang_type_1',category:'4. A szögek',difficulty:'easy',type:'shortnum',time:20,points:50,question:'Hány fokos a derékszög?',correctAnswer:'90',explanation:'A derékszög (mint a füzet sarka) pontosan 90 fokos.'},
   {id:'ang_type_2',category:'4. A szögek',difficulty:'easy',type:'shortnum',time:20,points:50,question:'Hány fokos az egyenesszög?',correctAnswer:'180',explanation:'Két derékszög tesz ki egy egyenesszöget: 90 + 90 = 180 fok.'},
   {id:'ang_type_3',category:'4. A szögek',difficulty:'medium',type:'mcq',time:25,points:100,question:'Milyen szög a 120°?',options:['Tompaszög','Hegyesszög','Derékszög','Homorúszög'],correct:0,explanation:'Mivel nagyobb 90 foknál, de kisebb 180-nál, ezért tompaszög.'},
@@ -787,7 +771,7 @@ export const questionBank: Question[] = [
   {id:'ang_meas_5',category:'4. A szögek',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Hány fokos szöget zárnak be az óra mutatói 6 órakor?',correctAnswer:'180',explanation:'A két mutató egy egyenes vonalat alkot. Ez az egyenesszög, ami 180 fok.'},
   {id:'ang_tri_1',category:'4. A szögek',difficulty:'easy',type:'shortnum',time:20,points:50,question:'Mennyi a háromszög belső szögeinek összege?',correctAnswer:'180',explanation:'Bármilyen háromszöget rajzolsz, a belső szögei mindig 180 fokot tesznek ki.'},
   {id:'ang_tri_2',category:'4. A szögek',difficulty:'medium',type:'shortnum',time:30,points:100,question:'Ha egy háromszög két szöge 60° és 50°, hány fokos a harmadik?',correctAnswer:'70',explanation:'Összesen 180-nak kell lennie. 60 + 50 = 110. A maradék: 180 - 110 = 70.'},
-  {id:'ang_tri_3',category:'4. A szögek',difficulty:'medium',type:'shortnum',time:30,points:100,question:'Lehet-e egy háromszögnek két derékszöge?',options:['Nem','Igen','Csak ha nagy','Csak ha kicsi'],correct:0,explanation:'Nem, because 90 + 90 = 180, így a harmadik szögre nem maradna semmi.'},
+  {id:'ang_tri_3',category:'4. A szögek',difficulty:'medium',type:'mcq',time:30,points:100,question:'Lehet-e egy háromszögnek két derékszöge?',options:['Nem','Igen','Csak ha nagy','Csak ha kicsi'],correct:0,explanation:'Nem, because 90 + 90 = 180, így a harmadik szögre nem maradna semmi.'},
   {id:'ang_tri_4',category:'4. A szögek',difficulty:'hard',type:'shortnum',time:30,points:200,question:'Egy egyenlő oldalú háromszögnek hány fokosak a szögei?',correctAnswer:'60',explanation:'Mivel az oldalak egyenlőek, a szögek is. 180 : 3 = 60 fok.'},
   {id:'ang_tri_5',category:'4. A szögek',difficulty:'hard',type:'mcq',time:30,points:200,question:'Milyen háromszög az, amelynek van egy tompaszöge?',options:['Tompaszögű','Hegyesszögű','Derékszögű','Szabályos'],correct:0,explanation:'A háromszögeket a legnagyobb szögük alapján nevezzük el.'},
   {id:'ang_theory_1',category:'4. A szögek',difficulty:'easy',type:'mcq',time:20,points:50,question:'Milyen szöget zárnak be a téglalap szomszédos oldalai?',options:['Hegyesszöget','Tompaszöget','Derékszöget','Egyenesszöget'],correct:2,explanation:'A téglalap sarkai "szabályosak", azaz 90 fokosak (derékszögek).'},
@@ -843,8 +827,6 @@ export const questionBank: Question[] = [
     correct: true,
     explanation: 'Igaz, például a szabályos háromszögben mindhárom szög 60 fokos (hegyes).'
   },
-
-  // --- 6. A téglalap ---
   {id:'meas_rect_1',category:'6. A téglalap',difficulty:'medium',type:'shortnum',time:30,points:100,question:'Mennyi a 4 cm és 5 cm oldalú téglalap kerülete (cm)?',correctAnswer:'18',explanation:'A kerület az oldalak hossza körbe: 4 + 5 + 4 + 5 = 18 cm.'},
   {id:'meas_rect_2',category:'6. A téglalap',difficulty:'medium',type:'shortnum',time:30,points:100,question:'Mennyi a 4 cm és 5 cm oldalú téglalap területe (cm²)?',correctAnswer:'20',explanation:'Terület = oldal szorozva a szomszédos oldallal. 4 · 5 = 20 cm².'},
   {id:'meas_rect_3',category:'6. A téglalap',difficulty:'easy',type:'shortnum',time:25,points:50,question:'Mennyi az 5 méter oldalú négyzet kerülete (m)?',correctAnswer:'20',explanation:'A négyzetnek 4 egyforma oldala van. 4 · 5 = 20 m.'},
@@ -858,8 +840,6 @@ export const questionBank: Question[] = [
   {id:'unit_area_1',category:'6. A téglalap',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Hány mm² 1 cm²?',correctAnswer:'100',explanation:'1 cm = 10 mm. Területnél: 10 · 10 = 100.'},
   {id:'unit_area_h1',category:'6. A téglalap',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Hány cm² egy 2 dm²-es terület?',correctAnswer:'200',explanation:'dm² --(100)--> cm². 2 · 100 = 200 cm².'},
   {id:'unit_area_h2',category:'6. A téglalap',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Hány m² 500 dm²?',correctAnswer:'5',explanation:'dm² --(:100)--> m². 500 : 100 = 5 m².'},
-
-  // --- 7. A téglatest ---
   {id:'meas_body_1',category:'7. A téglatest',difficulty:'easy',type:'shortnum',time:20,points:50,question:'Hány lapja van a kockának?',correctAnswer:'6',explanation:'Gondolj a dobókockára! 6 oldala (lapja) van, 1-től 6-ig.'},
   {id:'meas_body_2',category:'7. A téglatest',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Hány éle van a téglatestnek?',correctAnswer:'12',explanation:'4 él lent, 4 él fent, és 4 él oldalt a magasságnál. Összesen 12.'},
   {id:'meas_body_3',category:'7. A téglatest',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Hány csúcsa van a kockának?',correctAnswer:'8',explanation:'4 sarok (csúcs) van felül, és 4 alul. Összesen 8.'},
@@ -870,8 +850,6 @@ export const questionBank: Question[] = [
   {id:'meas_vol_3',category:'7. A téglatest',difficulty:'medium',type:'shortnum',time:35,points:100,question:'Egy téglatest élei 1 cm, 2 cm, 3 cm. Mennyi a térfogata (cm³)?',correctAnswer:'6',explanation:'A három különböző élt kell összeszorozni: 1 · 2 · 3 = 6.'},
   {id:'meas_vol_4',category:'7. A téglatest',difficulty:'medium',type:'mcq',time:30,points:100,question:'Mivel mérjük a térfogatot?',options:['cm³','cm²','cm','kg'],correct:0,explanation:'A kis 3-as a "köb"-öt jelenti (köbcentiméter), ez a térfogat mértékegysége.'},
   {id:'meas_vol_5',category:'7. A téglatest',difficulty:'hard',type:'shortnum',time:40,points:200,question:'Hány db 1 cm³-es kiskockából lehet kirakni egy 3 cm oldalú nagykockát?',correctAnswer:'27',explanation:'Az egyik sorban 3, mögötte még 3 sor (az 9), és ebből 3 réteg egymáson. 3 · 3 · 3 = 27.'},
-
-  // --- 8. A tizedes törtek ---
   {id:'dec_write_1',category:'8. A tizedes törtek',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Írd le tizedes törtként: 5 egész 3 tized!',correctAnswer:'5,3',explanation:'Az egészeket tizedesvesszővel választjuk el a tizedektől. 5 egész, vessző, 3 tized.'},
   {id:'dec_write_2',category:'8. A tizedes törtek',difficulty:'medium',type:'mcq',time:25,points:100,question:'Melyik számjegy áll a századok helyén a 12,456-ban?',options:['5','4','6','2'],correct:0,explanation:'A tizedesvessző után az első a tized, a második a század. Itt az 5-ös áll ott.'},
   {id:'dec_write_3',category:'8. A tizedes törtek',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Mennyi a 0,7 tört alakban? (pl. x/y)',correctAnswer:'7/10',explanation:'A 0,7 kimondva: nulla egész hét tized. Törtként: 7/10.'},
@@ -882,7 +860,7 @@ export const questionBank: Question[] = [
   {id:'dec_comp_3',category:'8. A tizedes törtek',difficulty:'medium',type:'tf',time:20,points:100,question:'Igaz vagy hamis: 2,3 = 2,30',correct:true,explanation:'Igaz. A tizedes tört végére írt nullák nem változtatják meg az értéket.'},
   {id:'dec_comp_4',category:'8. A tizedes törtek',difficulty:'hard',type:'matching',time:30,points:200,question:'Rendezd sorba (kicsitől nagyig):',pairs:{'Kicsi':'0,3','Közepes':'0,33','Nagy':'0,4'},explanation:'Pótold ki őket: 0,30 < 0,33 < 0,40.'},
   {id:'dec_comp_5',category:'8. A tizedes törtek',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Melyik egész szám van legközelebb a 4,9-hez?',correctAnswer:'5',explanation:'A 4,9 csak egy tizedre van az 5-től.'},
-  {id:'dec_op_1',category:'8. A tizedes törtek',difficulty:'medium',type:'shortnum',time:30,points:100,question:'Mennyi 1,2 + 3,5?',correctAnswer:'4,7',explanation:'Add össze a tizedeket (2+5=7) és az egészeket (1+3=4). Eredmény: 4,7.'},
+  {id:'dec_op_1',category:'8. A tizedes törtek',difficulty:'medium',type:'shortnum',time:30,points:100,question:'Mennyi 1,2 + 3,5?',correctAnswer:'4,7',explanation:'Add össze a tizedeket (2+5=7) and az egészeket (1+3=4). Eredmény: 4,7.'},
   {id:'dec_op_2',category:'8. A tizedes törtek',difficulty:'medium',type:'shortnum',time:30,points:100,question:'Mennyi 5,5 - 1,2?',correctAnswer:'4,3',explanation:'5 tizedből 2 tized az 3 tized. 5 egészből 1 egész az 4 egész. Eredmény: 4,3.'},
   {id:'dec_op_3',category:'8. A tizedes törtek',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Mennyi 2,5 + 1,8?',correctAnswer:'4,3',explanation:'5+8=13 tized. Ez 1 egész és 3 tized. Az 1 egészet hozzáadjuk a többihez: 2+1+1=4. Eredmény: 4,3.'},
   {id:'dec_op_4',category:'8. A tizedes törtek',difficulty:'hard',type:'shortnum',time:35,points:200,question:'Mennyi 4 - 0,5?',correctAnswer:'3,5',explanation:'4 egészből elveszünk felet (0,5). Marad 3 és fél, azaz 3,5.'},
@@ -894,8 +872,6 @@ export const questionBank: Question[] = [
   {id:'dec_mul10_5',category:'8. A tizedes törtek',difficulty:'easy',type:'tf',time:20,points:50,question:'Igaz vagy hamis: Ha 10-zel szorzunk, a szám értéke nő.',correct:true,explanation:'Igaz. A 10-szerese mindig nagyobb (kivéve, ha 0-t szorzunk).'},
   {id:'dec_theory_1',category:'8. A tizedes törtek',difficulty:'easy',type:'tf',time:20,points:50,question:'Igaz vagy hamis: A 2,5 és a 2,500 értéke ugyanaz.',correct:true,explanation:'A tizedesvessző utáni számjegyek végére írt nullák nem változtatják meg a szám értékét.'},
   {id:'dec_theory_2',category:'8. A tizedes törtek',difficulty:'medium',type:'mcq',time:20,points:100,question:'Melyik irányba mozdul a tizedesvessző, ha 10-zel osztunk?',options:['Jobbra','Balra','Nem mozdul','Eltűnik'],correct:1,explanation:'Ha osztunk, a szám kisebb lesz, ezért a tizedesvesszőt balra toljuk.'},
-
-  // --- 3. Mérés, statisztika ---
   {id:'unit_len_1',category:'3. Mérés, statisztika',difficulty:'easy',type:'shortnum',time:20,points:50,question:'Hány mm 1 cm?',correctAnswer:'10',explanation:'A vonalzódon a centik között 10 kis beosztás (mm) van.'},
   {id:'unit_len_2',category:'3. Mérés, statisztika',difficulty:'easy',type:'shortnum',time:20,points:50,question:'Hány m 1 km?',correctAnswer:'1000',explanation:'A "kilo" előtag ezret jelent. 1 kilométer = 1000 méter.'},
   {id:'unit_len_3',category:'3. Mérés, statisztika',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Hány cm 1,5 méter?',correctAnswer:'150',explanation:'1 méter = 100 cm. A másfél méter az 100 + 50 = 150 cm.'},
@@ -976,16 +952,14 @@ export const questionBank: Question[] = [
   {id:'unit_est_4',category:'3. Mérés, statisztika',difficulty:'medium',type:'mcq',time:25,points:100,question:'Mennyi folyadék fér egy átlagos vizespohárba?',options:['2 dl','2 l','2 cl','2 ml'],correct:0,explanation:'A poharak űrtartalma kb. 2 dl.'},
   {id:'unit_est_5',category:'3. Mérés, statisztika',difficulty:'medium',type:'mcq',time:25,points:100,question:'Milyen magas egy átlagos tanterem?',options:['3 m','30 cm','30 m','3 km'],correct:0,explanation:'Egy szoba magassága kb. 3 méter.'},
   {id:'unit_est_6',category:'3. Mérés, statisztika',difficulty:'medium',type:'mcq',time:25,points:100,question:'Mennyi egy kg kenyér tömege dkg-ban?',options:['100 dkg','10 dkg','1000 dkg','50 dkg'],correct:0,explanation:'1 kg = 100 dkg.'},
-  {id:'unit_temp_2',category:'3. Mérés, statisztika',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Hány fok a különbség a -5 °C és a 15 °C között?',correctAnswer:'20',explanation:'-5-től 15-ig 20 fok különbség.'},
-  {id:'unit_comp_1',category:'3. Mérés, statisztika',difficulty:'hard',type:'shortnum',time:40,points:200,question:'Mennyi 2 m és 45 cm milliméterben?',correctAnswer:'2450',explanation:'2000 + 450 = 2450 mm.'},
+  {id:'unit_temp_2',category:'3. Mérés, statisztika',difficulty:'medium',type:'shortnum',time:25,points:100,question:'Hány fok a különbség a -5 °C and a 15 °C között?',correctAnswer:'20',explanation:'-5-től 15-ig 20 fok különbség.'},
+  {id:'unit_comp_1',category:'3. Mérés, statisztika',difficulty:'hard',type:'shortnum',time:40,points:200,question:'Mennyi 2 m and 45 cm milliméterben?',correctAnswer:'2450',explanation:'2000 + 450 = 2450 mm.'},
   {id:'unit_theory_pref',category:'3. Mérés, statisztika',difficulty:'medium',type:'matching',time:35,points:100,question:'Párosítsd a prefixumokat a jelentésükkel:',pairs:{'kilo-':'ezerszeres','milli-':'ezredrész','centi-':'századrész'},explanation:'Görög/latin előtagok.'},
   {id:'unit_theory_area',category:'3. Mérés, statisztika',difficulty:'hard',type:'tf',time:25,points:200,question:'Igaz vagy hamis: A terület váltószámai (m², dm², cm²) 100-asával ugranak.',correct:true,explanation:'Igaz, a területnél 10·10=100 a váltó.'},
   {id:'unit_mix_3',category:'3. Mérés, statisztika',difficulty:'medium',type:'mcq',time:30,points:100,question:'Melyik a rövidebb?',options:['150 mm','2 dm','Egyenlőek','Nem dönthető el'],correct:0,explanation:'150 mm = 1,5 dm < 2 dm.'},
   {id:'unit_mix_4',category:'3. Mérés, statisztika',difficulty:'easy',type:'tf',time:20,points:50,question:'Igaz vagy hamis: 1 liter víz tömege kb. 1 kg.',correct:true,explanation:'Igaz, a víz sűrűsége miatt.'},
   {id:'unit_match_2',category:'3. Mérés, statisztika',difficulty:'medium',type:'matching',time:35,points:100,question:'Párosítsd a mennyiségeket:',pairs:{'1000 g':'1 kg','1000 kg':'1 t','100 dkg':'1 kg'},explanation:'Tömegegységek.'},
   {id:'unit_match_3',category:'3. Mérés, statisztika',difficulty:'medium',type:'matching',time:35,points:100,question:'Hosszúság váltások:',pairs:{'100 cm':'1 m','1000 m':'1 km','10 mm':'1 cm'},explanation:'Hosszúságok.'},
-
-  // --- BŐVÍTÉS: HALMAZBA SOROLÁS (Még 8 db) ---
   {
     id: 'set_3', category: '1. Természetes számok', difficulty: 'medium', type: 'set_placement', time: 50, points: 200,
     question: 'Helyezd el a számokat az oszthatósági halmazábrán!',
@@ -1089,8 +1063,6 @@ export const questionBank: Question[] = [
     ],
     explanation: '-2 negatív és páros. -5 csak negatív. 4 csak páros. 7 egyik sem.'
   },
-
-  // --- BŐVÍTÉS: BECSLÉS CSÚSZKÁVAL (Még 6 db) ---
   {
     id: 'est_elephant', category: '3. Mérés, statisztika', difficulty: 'medium', type: 'estimation', time: 30, points: 150,
     question: 'Becsüld meg egy felnőtt afrikai elefánt átlagos tömegét (tonna)!',
@@ -1127,8 +1099,6 @@ export const questionBank: Question[] = [
     min: 100, max: 2000, correctValue: 1000, unit: 'gramm', tolerance: 20,
     explanation: 'A leggyakoribb kiszerelés az 1 kg-os (1000 g).'
   },
-
-  // --- BŐVÍTÉS: KOORDINÁTA KIJELÖLÉS (Még 7 db) ---
   {
     id: 'coord_square', category: '10. Helymeghatározás', difficulty: 'medium', type: 'coordinate_picker', time: 40, points: 200,
     question: 'Egy négyzet három csúcsa: (0;0), (4;0) és (4;4). Hol van a negyedik? Kattints rá!',
@@ -1152,7 +1122,7 @@ export const questionBank: Question[] = [
   },
   {
     id: 'coord_step_1_q', category: '10. Helymeghatározás', difficulty: 'medium', type: 'coordinate_picker', time: 35, points: 150,
-    question: 'Indulj az (1;1) pontból! Lépj 2-t fel és 1-et balra! Hol vagy?',
+    question: 'Indulj az (1;1) pontból! Lépj 2-t fel and 1-et balra! Hol vagy?',
     target: { x: 0, y: 3, label: 'V' },
     gridConfig: { points: [{label: 'Start', x: 1, y: 1}] },
     explanation: '1-1 = 0 (balra x csökken), 1+2 = 3 (fel y nő). Pont: (0;3).'
@@ -1176,8 +1146,6 @@ export const questionBank: Question[] = [
     target: { x: 4, y: 0, label: 'K' },
     explanation: 'Az origótól jobbra 4 lépés az x=4. Mivel a tengelyen van, y=0.'
   },
-
-  // --- BŐVÍTÉS: SORRENDBE RENDEZÉS (Még 8 db) ---
   {
     id: 'ord_nat_q', category: '1. Természetes számok', difficulty: 'easy', type: 'ordering', time: 30, points: 100,
     question: 'Rendezd növekvő sorrendbe a számokat!',
@@ -1234,32 +1202,30 @@ export const questionBank: Question[] = [
     correctOrder: ['1/2', '5/4', '1 1/2', '7/4', '2'],
     explanation: 'Negyedekben: 2/4, 5/4, 6/4, 7/4, 8/4.'
   },
-
-  // --- BŐVÍTÉS: MŰVELETI TERV (Még 8 db) ---
   {
     id: 'plan_area_q', category: '6. A téglalap', difficulty: 'medium', type: 'plan_selector', time: 40, points: 150,
-    question: 'Egy 8 m hosszú és 5 m széles szoba alapterületét számoljuk. Melyik a jó terv?',
+    question: 'Egy 8 m hosszú and 5 m széles szoba alapterületét számoljuk. Melyik a jó terv?',
     options: ['8 · 5', '8 + 5', '(8 + 5) · 2', '8 · 8'],
     correct: 0,
     explanation: 'Terület = hosszúság szorozva szélességgel.'
   },
   {
     id: 'plan_perim_q', category: '6. A téglalap', difficulty: 'medium', type: 'plan_selector', time: 40, points: 150,
-    question: 'Melyik tervvel számoljuk ki egy 6 cm és 4 cm oldalú téglalap kerületét?',
+    question: 'Melyik tervvel számoljuk ki egy 6 cm and 4 cm oldalú téglalap kerületét?',
     options: ['(6 + 4) · 2', '6 · 4', '6 + 4', '6 · 4 · 2'],
     correct: 0,
     explanation: 'Kerület = (a + b) · 2.'
   },
   {
     id: 'plan_multi_q', category: '1. Természetes számok', difficulty: 'hard', type: 'plan_selector', time: 50, points: 200,
-    question: 'Vettem 3 füzetet (egyenként 200 Ft) és egy tollat (500 Ft). Mennyit fizettem? Terv:',
+    question: 'Vettem 3 füzetet (egyenként 200 Ft) and egy tollat (500 Ft). Mennyit fizettem? Terv:',
     options: ['3 · 200 + 500', '(3 + 500) · 200', '3 · (200 + 500)', '200 + 500'],
     correct: 0,
     explanation: 'A füzetek ára (3*200) plusz a toll ára (500).'
   },
   {
     id: 'plan_diff_q', category: '1. Természetes számok', difficulty: 'hard', type: 'plan_selector', time: 45, points: 200,
-    question: 'A 100 és 40 különbségét szorozd meg 2-vel! Melyik a jó kifejezés?',
+    question: 'A 100 and 40 különbségét szorozd meg 2-vel! Melyik a jó kifejezés?',
     options: ['(100 - 40) · 2', '100 - 40 · 2', '100 · 2 - 40', '(100 + 40) · 2'],
     correct: 0,
     explanation: 'A különbséget (zárójel) kell megszorozni.'
@@ -1287,13 +1253,11 @@ export const questionBank: Question[] = [
   },
   {
     id: 'plan_unit_conv_q', category: '3. Mérés, statisztika', difficulty: 'hard', type: 'plan_selector', time: 50, points: 200,
-    question: 'Hány cm összesen 2 méter és 5 deciméter? Terv:',
+    question: 'Hány cm összesen 2 méter and 5 deciméter? Terv:',
     options: ['2 · 100 + 5 · 10', '2 · 10 + 5 · 100', '2 + 5', '200 + 5'],
     correct: 0,
     explanation: '2 méter = 200 cm, 5 dm = 50 cm. Tehát 2*100 + 5*10.'
   },
-
-  // --- BŐVÍTÉS: SZÖVEGES VÁLASZ (Még 9 db) ---
   {
     id: 'short_1_q', category: '5. A törtszámok', difficulty: 'medium', type: 'short', time: 30, points: 100,
     question: 'Egyszerűsítsd a 12/16 törtet! (x/y alakban)',
@@ -1304,7 +1268,7 @@ export const questionBank: Question[] = [
     id: 'short_2_q', category: '5. A törtszámok', difficulty: 'medium', type: 'short', time: 30, points: 100,
     question: 'Bővítsd a 2/5 törtet úgy, hogy a nevező 10 legyen! (x/y alakban)',
     correctAnswer: '4/10',
-    explanation: 'Szorozd meg a számlálót és a nevezőt is 2-vel!'
+    explanation: 'Szorozd meg a számlálót and a nevezőt is 2-vel!'
   },
   {
     id: 'short_3_q', category: '5. A törtszámok', difficulty: 'easy', type: 'short', time: 25, points: 100,
@@ -1350,8 +1314,85 @@ export const questionBank: Question[] = [
   }
 ];
 
-// Helper to shuffle questions
+export class QuestionFactory {
+  // A validáció mostantól statikusan tárolja az eredményt a hatékonyság érdekében
+  private static validatedBank: Question[] | null = null;
+
+  static validate(q: Question): boolean {
+    const qId = q.id;
+    if (!qId || !q.question || !q.type || !q.category || !q.difficulty) {
+      console.warn(`Hiányzó alapvető mező a kérdésnél (ID: ${qId || 'unknown'})`);
+      return false;
+    }
+
+    switch (q.type) {
+      case 'mcq':
+      case 'plan_selector':
+        if (!q.options || q.options.length === 0 || typeof q.correct !== 'number') {
+          console.warn(`Érvénytelen MCQ/Plan kérdés (ID: ${qId})`);
+          return false;
+        }
+        break;
+      case 'tf':
+        if (typeof q.correct !== 'boolean') {
+          console.warn(`Érvénytelen Igaz/Hamis kérdés (ID: ${qId})`);
+          return false;
+        }
+        break;
+      case 'short':
+      case 'shortnum':
+        if (!q.correctAnswer) {
+          console.warn(`Hiányzó válasz a ShortAnswer kérdésnél (ID: ${qId})`);
+          return false;
+        }
+        break;
+      case 'ordering':
+        if (!q.items || !q.correctOrder || q.items.length !== q.correctOrder.length) {
+          console.warn(`Érvénytelen Ordering kérdés (ID: ${qId})`);
+          return false;
+        }
+        break;
+      case 'matching':
+        if (!q.pairs || Object.keys(q.pairs).length === 0) {
+          console.warn(`Érvénytelen Matching kérdés (ID: ${qId})`);
+          return false;
+        }
+        break;
+      case 'estimation':
+        if (typeof q.correctValue !== 'number' || typeof q.min !== 'number' || typeof q.max !== 'number') {
+          console.warn(`Érvénytelen Estimation kérdés (ID: ${qId})`);
+          return false;
+        }
+        break;
+      case 'set_placement':
+        if (!q.itemsToPlace || !q.setA || !q.setB) {
+          console.warn(`Érvénytelen SetPlacement kérdés (ID: ${qId})`);
+          return false;
+        }
+        break;
+      case 'coordinate_picker':
+        if (!q.target) {
+          console.warn(`Hiányzó célpont a CoordinatePicker kérdésnél (ID: ${qId})`);
+          return false;
+        }
+        break;
+    }
+    return true;
+  }
+
+  static getBank(): Question[] {
+    if (!this.validatedBank) {
+      this.validatedBank = rawQuestionBank.filter(q => this.validate(q));
+    }
+    return this.validatedBank;
+  }
+}
+
+// A validálás csak egyszer fut le az exportáláskor
+export const questionBank = QuestionFactory.getBank();
+
 export function getShuffledQuestions(count: number = 10, category: string = 'all'): Question[] {
+  // A questionBank már validált adatokat tartalmaz
   let pool = questionBank;
   if (category && category !== 'all') {
     pool = questionBank.filter(q => q.category === category);

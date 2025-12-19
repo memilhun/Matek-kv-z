@@ -17,6 +17,21 @@
               primary: '#0f172a',
               card: '#1e293b',
               accent: '#3b82f6',
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.4s ease-out forwards',
+              'bounce-subtle': 'bounceSubtle 2s infinite',
+              'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              bounceSubtle: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-4px)' },
+              }
             }
           }
         }
@@ -24,24 +39,25 @@
     </script>
     <style>
       html {
-        touch-action: manipulation; /* Prevents double-tap zoom */
-        -webkit-text-size-adjust: 100%; /* Prevents font scaling */
+        touch-action: manipulation;
+        -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
       }
       body {
         background: radial-gradient(circle at top center, #1e293b 0%, #020617 100%);
         color: #e2e8f0;
-        overscroll-behavior-y: none; /* Prevents bounce effects */
+        overscroll-behavior-y: none;
+        min-height: 100vh;
       }
-      /* Custom scrollbar for leaderboards */
-      ::-webkit-scrollbar {
-        width: 8px;
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
       }
-      ::-webkit-scrollbar-track {
+      .custom-scrollbar::-webkit-scrollbar-track {
         background: rgba(255, 255, 255, 0.05);
       }
-      ::-webkit-scrollbar-thumb {
+      .custom-scrollbar::-webkit-scrollbar-thumb {
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
+        border-radius: 3px;
       }
     </style>
   <script type="importmap">

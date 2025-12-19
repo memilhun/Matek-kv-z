@@ -1,5 +1,14 @@
-
-export type QuestionType = 'mcq' | 'tf' | 'short' | 'shortnum' | 'matching' | 'ordering' | 'set_placement' | 'estimation' | 'plan_selector' | 'coordinate_picker';
+export type QuestionType = 
+  | 'mcq' 
+  | 'tf' 
+  | 'short' 
+  | 'shortnum' 
+  | 'matching' 
+  | 'ordering' 
+  | 'set_placement' 
+  | 'estimation' 
+  | 'plan_selector' 
+  | 'coordinate_picker';
 
 export interface GridPoint {
   label: string;
@@ -7,48 +16,43 @@ export interface GridPoint {
   y: number;
 }
 
-export interface Question {
+interface BaseQuestion {
   id: string;
   category: string;
   difficulty: 'easy' | 'medium' | 'hard';
-  type: QuestionType;
   time: number;
   points: number;
   question: string;
   explanation?: string;
-  options?: string[];
-  correct?: number | boolean;
-  correctAnswer?: string;
-  pairs?: Record<string, string>;
-  // Ordering
-  items?: string[];
-  correctOrder?: string[];
-  // Set Placement
-  setA?: { label: string; rule: string };
-  setB?: { label: string; rule: string };
-  itemsToPlace?: { val: string; correctZone: 'A' | 'B' | 'Both' | 'None' }[];
-  // Estimation
-  min?: number;
-  max?: number;
-  correctValue?: number;
-  unit?: string;
-  tolerance?: number; // percentage
-  // Coordinate picker / Grid
-  target?: { x: number; y: number; label: string };
   gridConfig?: {
     points: GridPoint[];
     highlight?: string;
   };
 }
 
+export type Question = BaseQuestion & (
+  | { type: 'mcq' | 'plan_selector'; options: string[]; correct: number; }
+  | { type: 'tf'; correct: boolean; }
+  | { type: 'short' | 'shortnum'; correctAnswer: string; }
+  | { type: 'matching'; pairs: Record<string, string>; }
+  | { type: 'ordering'; items: string[]; correctOrder: string[]; }
+  | { type: 'set_placement'; setA: { label: string; rule: string }; setB: { label: string; rule: string }; itemsToPlace: { val: string; correctZone: string }[]; }
+  | { type: 'estimation'; min: number; max: number; correctValue: number; unit: string; tolerance?: number; }
+  | { type: 'coordinate_picker'; target: { x: number; y: number; label: string }; }
+);
+
+export type CoordinateValue = { x: number; y: number };
+export type PairValue = { k: string; actual: string }[];
+export type SetPlacementValue = { val: string; zone: string }[];
+
 export type AnswerValue = 
   | string 
   | number 
   | boolean 
-  | {k: string, actual: string}[] 
+  | PairValue 
   | string[] 
-  | {val: string, zone: string}[]
-  | {x: number, y: number};
+  | SetPlacementValue
+  | CoordinateValue;
 
 export interface AnswerRecord {
   questionId: string;
@@ -80,5 +84,5 @@ export interface GlobalStats {
 
 export type GameState = 'MENU' | 'PLAYING' | 'FINISHED' | 'STATS';
 
-export const STORAGE_KEY_LEADERBOARD = 'mv_lb';
+export const STORAGE_KEY_LEADERBOARD = 'mv_lb_v2';
 export const GAS_URL = 'https://script.google.com/macros/s/AKfycbzrA2bTOtu7dlVLREcm7zjw4eKF42GVmNBHqqyQwtobbQRE3DQ8ZsCGd-zhmd11pnzgNg/exec';
