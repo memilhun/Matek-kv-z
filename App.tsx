@@ -7,7 +7,7 @@ import { ResultScreen } from './components/ResultScreen';
 import { Leaderboard } from './components/Leaderboard';
 import { StatisticsScreen } from './components/StatisticsScreen';
 
-const APP_VERSION = '1.0.2';
+const APP_VERSION = '1.0.3';
 
 export default function App() {
   const [gameState, setGameState] = useState<GameState>('MENU');
@@ -24,7 +24,15 @@ export default function App() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isAnswerProcessedRef = useRef(false);
 
-  const categories = useMemo(() => Array.from(new Set(questionBank.map(q => q.category))), []);
+  // Kategóriák kigyűjtése és numerikus sorrendbe rendezése
+  const categories = useMemo(() => {
+    return Array.from(new Set(questionBank.map(q => q.category)))
+      .sort((a, b) => {
+        const numA = parseInt(a.split('.')[0]);
+        const numB = parseInt(b.split('.')[0]);
+        return numA - numB;
+      });
+  }, []);
 
   const fetchLeaderboard = async () => {
     setIsLoadingLb(true);
@@ -173,18 +181,18 @@ export default function App() {
               <div className="bg-slate-800 p-6 md:p-8 rounded-2xl border border-blue-500/20 shadow-xl flex-1 flex flex-col justify-center">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-3 bg-blue-500/20 rounded-lg text-blue-400"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                  <div><h2 className="text-2xl font-bold text-white">Új Játék Indítása</h2><p className="text-slate-400 text-sm">Válassz témakört és kezdődjön a kihívás!</p></div>
+                  <div><h2 className="text-2xl font-bold text-white">Új Játék Indítása</h2><p className="text-slate-400 text-sm">Válassz fejezetet a tankönyv alapján!</p></div>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs uppercase text-slate-500 font-bold mb-2 ml-1">Témakör</label>
+                    <label className="block text-xs uppercase text-slate-500 font-bold mb-2 ml-1">Témakör (Tankönyvi fejezet)</label>
                     <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-4 text-white outline-none focus:border-blue-500 transition-all cursor-pointer hover:bg-slate-900/80">
-                      <option value="all">🎲 Minden kategória (Vegyes)</option>
-                      {categories.map(cat => <option key={cat} value={cat}>Téma: {cat}</option>)}
+                      <option value="all">🎲 Vegyes feladatok (Minden fejezet)</option>
+                      {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
                   </div>
                   <button onClick={startGame} className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xl font-bold py-5 rounded-xl shadow-lg shadow-blue-900/30 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2">Indítás <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg></button>
-                  <div className="text-center text-xs text-slate-500 mt-2">A játék 10 véletlenszerű kérdést tartalmaz.</div>
+                  <div className="text-center text-xs text-slate-500 mt-2">A kvíz 10 kérdést tartalmaz a kiválasztott témából.</div>
                 </div>
               </div>
               <button onClick={() => setGameState('STATS')} className="bg-slate-800/50 hover:bg-slate-800 p-6 rounded-2xl border border-white/5 hover:border-white/10 transition-all text-left group flex items-center justify-between">

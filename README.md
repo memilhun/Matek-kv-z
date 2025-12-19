@@ -6,49 +6,136 @@ Ez egy modern, mobil-optimalizált React-alapú oktatási alkalmazás, amely seg
 ## 📚 Oktatási Tartalom
 
 A feladatbank (150+ kérdés) az alábbi fő kategóriákat fedi le:
+1. Egész számok, 2. Helymeghatározás, 3. Törtszámok, 4. Természetes számok, 5. Geometriai alapismeretek, 6. Szögek, 7. Kerület/Terület/Térfogat, 8. Tizedes törtek, 9. Mértékegységek.
 
-1.  **Egész számok**: Összeadás, kivonás, abszolút érték, ellentett és számegyenes.
-2.  **Helymeghatározás**: Interaktív koordináta-rendszer (SVG), tengelyek, síknegyedek, pontok koordinátái, tükrözés.
-3.  **Törtszámok**: Fogalmak, egyszerűsítés, bővítés, összehasonlítás, alapműveletek, törtrész számítás.
-4.  **Természetes számok**: Helyiérték, kerekítés, római számok, műveleti sorrend.
-5.  **Geometriai alapismeretek**: Vonalak, kör részei, sokszögek tulajdonságai.
-6.  **Szögek**: Szögfajták, mérés, háromszögek belső szögei, pótszögek.
-7.  **Kerület, Terület, Térfogat**: Síkidomok és testek (téglatest, kocka) mértékei, mértékegység-átváltás.
-8.  **Tizedes törtek**: Írásmód, összehasonlítás, alapműveletek, szorzás/osztás 10-zel/100-zal.
-9.  **Mértékegységek**: Hosszúság, tömeg, űrtartalom, idő és hőmérséklet.
+## 🎮 Játékmechanika
+Pontozás nehézség szerint, sorozat-szorzók, időbónusz és egyedi tipprendszer.
 
-## 🎮 Játékmechanika és Pontozás
+## 🌐 Online Működés (Google Apps Script)
 
-Az alkalmazás egy összetett pontozási algoritmust használ a motiváció fenntartása érdekében:
+A statisztikák és a ranglista mentéséhez egy Google Táblázatot használunk háttérként.
 
--   **Alappontok**: Nehézség szerint skálázódik (Könnyű: 50, Közepes: 100, Nehéz: 200).
--   **Részpontszám**: Párosítós feladatoknál a helyesen megtalált párok arányában jár a pont.
--   **Sorozat (Streak)**: Egymás utáni helyes válaszok esetén szorzó jár (2 helyes: 1.2x, 3+ helyes: 1.5x).
--   **Időbónusz**: A megmaradt idő minden másodperce 0.5 bónuszpontot ér.
--   **Anti-Guessing (Tippelés elleni védelem)**: Közepes és Nehéz feladatoknál, ha a válasz 2 másodpercen belül érkezik, az időbónusz érvényét veszti.
--   **Tipprendszer**: Segítség kérhető (magyarázat vagy opció eliminálás), de ez a megszerezhető pontszámot 50%-kal csökkenti.
+### Telepítési lépések (GAS):
 
-## 🌐 Online Működés és Google Sheets Integráció
+1. **Táblázat előkészítése:** Hozz létre egy Google Táblázatot két munkalappal: `SessionLog` és `Leaderboard`.
+2. **Szkript megnyitása:** Extensions -> Apps Script.
+3. **Kód beillesztése:** Másold be az alábbi kódot.
+4. **Módosítások élesítése (Kritikus lépés):**
+   - Kattints a **Deploy** -> **New deployment** gombra.
+   - Válaszd a **Web app** típust.
+   - *Execute as:* **Me**
+   - *Who has access:* **Anyone** (Ez kell az adatok fogadásához!)
+   - Kattints a **Deploy**-ra, hagyd jóvá az engedélyeket.
+   - A kapott **Web app URL**-t másold be a projekt `types.ts` fájljába a `GAS_URL` helyére.
+5. **Frissítés:** Ha később módosítod a szkriptet, **mindig csinálj egy "New deployment"-et**, különben nem lépnek életbe a változások!
 
-Az alkalmazás képes hálózati módban is működni egy Google Apps Script (GAS) háttérrendszeren keresztül:
+### Google Apps Script kód:
 
--   **Globális Ranglista**: Az eredmények egy központi Google Táblázatba mentődnek, így a tanulók összevethetik teljesítményüket másokkal is.
--   **Hálózati Statisztika**: A Statisztika menüpont "Globális Teljesítmény" füle a táblázatból kinyert adatok alapján mutatja az összesített átlagpontszámot és a kategóriák közötti valós nehézségi eloszlást.
--   **Automatikus Mentés**: Ha a felhasználó nem ad meg nevet vagy idő előtt elhagyja az eredményjelző oldalt, az alkalmazás "Anonymous" néven automatikusan archiválja a teljesítményt a statisztikai elemzésekhez.
--   **Hibás Válasz Analízis**: A rendszer rögzíti, mely kérdések okozzák a legtöbb nehézséget a közösségnek, segítve ezzel a tanári munkát.
+```javascript
+const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-## 🛠 Technikai Jellemzők
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const logSheet = ss.getSheetByName("SessionLog");
+    const lbSheet = ss.getSheetByName("Leaderboard");
+    
+    // Adatok naplózása a statisztikához
+    logSheet.appendRow([
+      new Date(),
+      data.name,
+      data.score,
+      data.correctAnswers,
+      data.totalQuestions,
+      JSON.stringify(data.history)
+    ]);
+    
+    // Név és pontszám mentése a ranglistához
+    lbSheet.appendRow([data.name, data.score, new Date()]);
+    
+    return ContentService.createTextOutput(JSON.stringify({"status": "success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
 
--   **SVG Koordináta-rendszer**: Egyedi fejlesztésű, reszponzív koordináta-háló, amely támogatja a pontok kiemelését és animált visszajelzést ad.
--   **Adatvezérelt Statisztika**: A Statisztika menüpont valós idejű elemzést ad a feladatbank összetételéről (nehézség, típus és kategória eloszlás).
--   **Hibrid Input**: Támogatja a numerikus (pl. 3,5 vagy 1/2) és a szöveges bevitelt is, automatikus normalizálással (szóközök, vesszők kezelése).
--   **Offline Működés**: Hálózati kapcsolat hiányában az alkalmazás a böngésző helyi tárolóját (LocalStorage) használja tartalékként.
+function doGet(e) {
+  const action = e.parameter.action;
+  
+  if (action === "getLeaderboard") {
+    const sheet = ss.getSheetByName("Leaderboard");
+    const values = sheet.getDataRange().getValues();
+    values.shift(); // Header eltávolítása
+    const entries = values.map(row => ({
+      name: row[0],
+      score: row[1],
+      date: row[2]
+    })).sort((a, b) => b.score - a.score).slice(0, 10);
+    return ContentService.createTextOutput(JSON.stringify(entries)).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  if (action === "getStats") {
+    const logSheet = ss.getSheetByName("SessionLog");
+    const data = logSheet.getDataRange().getValues();
+    data.shift();
 
-## 📱 Mobil Optimalizáció
+    let catStats = {};
+    let typeStats = {};
+    let questionStats = {};
+    let totalScore = 0;
 
--   `touch-action: manipulation` a nem kívánt nagyítás megelőzésére.
--   Reszponzív rácsszerkezet (grid) és rugalmas méretezés minden kijelzőméretre.
--   Gyors frissítésű időzítő (250ms tick rate) a sima vizuális élményért.
+    data.forEach(row => {
+      totalScore += Number(row[2]);
+      let history = [];
+      try { history = JSON.parse(row[5] || "[]"); } catch(e) {}
+      
+      history.forEach(h => {
+        // Kategória statisztika
+        if (!catStats[h.cat]) catStats[h.cat] = { total: 0, correct: 0 };
+        catStats[h.cat].total++;
+        if (h.correct) catStats[h.cat].correct++;
+
+        // Típus statisztika
+        let typeName = h.type || "Egyéb";
+        if (!typeStats[typeName]) typeStats[typeName] = { total: 0, correct: 0 };
+        typeStats[typeName].total++;
+        if (h.correct) typeStats[typeName].correct++;
+
+        // Kérdés nehézség statisztika
+        if (!questionStats[h.id]) questionStats[h.id] = { text: h.text || h.id, total: 0, fails: 0 };
+        questionStats[h.id].total++;
+        if (!h.correct) questionStats[h.id].fails++;
+      });
+    });
+
+    const categorySuccess = {};
+    for (let cat in catStats) {
+      categorySuccess[cat] = Math.round((catStats[cat].correct / catStats[cat].total) * 100);
+    }
+    
+    const typeSuccess = {};
+    for (let t in typeStats) {
+      typeSuccess[t] = Math.round((typeStats[t].correct / typeStats[t].total) * 100);
+    }
+
+    const difficultQuestions = Object.values(questionStats)
+      .map(q => ({ text: q.text, failRate: Math.round((q.fails / q.total) * 100) }))
+      .filter(q => q.failRate > 0)
+      .sort((a, b) => b.failRate - a.failRate)
+      .slice(0, 5);
+
+    return ContentService.createTextOutput(JSON.stringify({
+      totalCompletions: data.length,
+      avgScore: data.length > 0 ? Math.round(totalScore / data.length) : 0,
+      categorySuccess: categorySuccess,
+      typeSuccess: typeSuccess,
+      difficultQuestions: difficultQuestions
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
 
 ---
-*Verzió: 1.0.2 | Fejlesztve oktatási célokra, Google Sheets támogatással.*
+*Verzió: 1.0.4 | Fejlesztve oktatási célokra, telepítési útmutatóval.*

@@ -16,11 +16,9 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
   const [isSaving, setIsSaving] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   
-  // Refek a mentési állapot követéséhez, hogy elkerüljük a dupla küldést
   const hasSavedRef = useRef(false);
   const sessionDataRef = useRef<any>(null);
 
-  // Az adatok előkészítése a mentéshez (ref-ben is tároljuk az automatikus mentéshez)
   const getSessionData = (userName: string) => {
     const data = {
       name: userName.trim() || 'Anonymous',
@@ -30,24 +28,24 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
       correctAnswers: history.filter(h => h.correct).length,
       history: history.map(h => ({
         id: h.questionId,
+        text: h.questionText, // Szöveg hozzáadása a statisztikához
         correct: h.correct,
         time: h.timeSpent,
         hint: h.hintUsed,
-        cat: h.category
+        cat: h.category,
+        type: h.type // Típus hozzáadása a statisztikához
       }))
     };
     sessionDataRef.current = data;
     return data;
   };
 
-  // Automatikus mentés funkció (Anonymous néven, ha még nem történt mentés)
   const performAutoSave = () => {
     if (hasSavedRef.current || !GAS_URL) return;
     hasSavedRef.current = true;
     
     const data = getSessionData('Anonymous');
     
-    // fetch 'keepalive: true' használatával, hogy az oldal bezárása után is végbemenjen
     fetch(GAS_URL, {
       method: 'POST',
       mode: 'no-cors',
@@ -58,24 +56,18 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
   };
 
   useEffect(() => {
-    // Helyi ranglista betöltése
     try {
       const lb = JSON.parse(localStorage.getItem(STORAGE_KEY_LEADERBOARD) || '[]');
       setLeaderboard(Array.isArray(lb) ? lb : []);
     } catch (error) { setLeaderboard([]); }
 
-    // Eseményfigyelő az ablak bezárására / elnavigálásra
-    const handleBeforeUnload = () => {
-      performAutoSave();
-    };
-
+    const handleBeforeUnload = () => performAutoSave();
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') performAutoSave();
     });
 
     return () => {
-      // Tisztítás: ha a komponens unmountolódik (pl. Főmenüre kattintás), de még nincs mentve
       performAutoSave();
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
@@ -83,13 +75,12 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
 
   const handleSave = async () => {
     const finalName = name.trim() || 'Anonymous';
-    if (hasSavedRef.current && saved) return; // Már sikeresen mentve manuálisan
+    if (hasSavedRef.current && saved) return;
     
     setIsSaving(true);
     const sessionData = getSessionData(finalName);
-    hasSavedRef.current = true; // Megjelöljük, hogy a mentés folyamatban/kész
+    hasSavedRef.current = true;
 
-    // 1. Mentés helyi tárolóba
     const newEntry: LeaderboardEntry = { name: finalName, score, date: sessionData.date };
     const localLb = [...leaderboard, newEntry]
       .sort((a, b) => b.score - a.score)
@@ -97,7 +88,6 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
       .slice(0, 10);
     localStorage.setItem(STORAGE_KEY_LEADERBOARD, JSON.stringify(localLb));
     
-    // 2. Mentés hálózatra
     if (GAS_URL) {
       try {
         await fetch(GAS_URL, {
@@ -108,7 +98,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({ score, totalQuestion
         });
       } catch (e) { 
         console.error("Hiba a mentéskor:", e); 
-        hasSavedRef.current = false; // Hiba esetén újra próbálkozhat az automatikus mentés
+        hasSavedRef.current = false;
       }
     }
 
